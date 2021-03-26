@@ -1,6 +1,8 @@
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.4.31"
+    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("io.gitlab.arturbosch.detekt") version "1.16.0"
 
     `java-library`
     `maven-publish`
@@ -31,8 +33,12 @@ group = "io.egm.kngsild"
 
 tasks.jar {
     manifest {
-        attributes(mapOf("Implementation-Title" to "kngsild",
-            "Implementation-Version" to project.version))
+        attributes(
+            mapOf(
+                "Implementation-Title" to "kngsild",
+                "Implementation-Version" to project.version
+            )
+        )
     }
 }
 
@@ -56,5 +62,19 @@ publishing {
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
+    }
+}
+
+detekt {
+    toolVersion = "1.16.0"
+    input = files("src/main/kotlin", "src/test/kotlin")
+    config = files("$rootDir/config/detekt/detekt.yml")
+    buildUponDefaultConfig = true
+    baseline = file("$projectDir/config/detekt/baseline.xml")
+
+    reports {
+        xml.enabled = true
+        txt.enabled = false
+        html.enabled = true
     }
 }
