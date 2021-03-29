@@ -1,9 +1,9 @@
-
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.4.31"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.16.0"
+
     kotlin("kapt") version "1.3.61"
     `java-library`
     `maven-publish`
@@ -27,11 +27,10 @@ dependencies {
     "kapt"("io.arrow-kt:arrow-meta:$arrowVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     implementation("com.jayway.jsonpath:json-path:2.0.0")
-    implementation("org.slf4j:slf4j-log4j12:1.7.28")
+    implementation("org.slf4j:slf4j-log4j12:1.7.30")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-    testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
 version = "0.1.0"
