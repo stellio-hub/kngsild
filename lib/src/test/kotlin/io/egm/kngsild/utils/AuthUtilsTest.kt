@@ -48,13 +48,7 @@ class AuthUtilsTest {
         stubFor(
             post(urlMatching("/auth"))
                 .willReturn(
-                    ok().withBody(
-                        serializeObject(
-                            mapOf(
-                                "access_token" to "token"
-                            )
-                        )
-                    )
+                    ok().withBody(serializeObject(mapOf("access_token" to "token")))
                 )
         )
 
