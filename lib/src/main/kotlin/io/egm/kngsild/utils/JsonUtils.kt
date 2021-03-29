@@ -11,4 +11,7 @@ object JsonUtils {
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .findAndRegisterModules()
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+    fun serializeObject(input: Any): String =
+        mapper.writeValueAsString(input)
 }

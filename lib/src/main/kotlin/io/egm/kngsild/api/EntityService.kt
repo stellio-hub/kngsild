@@ -1,4 +1,4 @@
-package io.egm.kngsild.api.entities
+package io.egm.kngsild.api
 
 import arrow.core.Either
 import arrow.core.flatMap
@@ -6,10 +6,11 @@ import arrow.core.left
 import arrow.core.right
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
-import io.egm.kngsild.model.NgsildEntity
 import io.egm.kngsild.model.ResourceNotFound
+import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.HttpUtils
 import io.egm.kngsild.utils.JsonUtils
+import io.egm.kngsild.utils.NgsildEntity
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URI
@@ -17,7 +18,8 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class EntityService(
-    private val httpUtils: HttpUtils
+    private val httpUtils: HttpUtils,
+    private val authUtils: AuthUtils
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -32,7 +34,7 @@ class EntityService(
         contextUrl: String
     ): Either<ApplicationError, List<NgsildEntity>> {
         val params: String = httpUtils.paramsUrlBuilder(queryParams)
-        return httpUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
             val request = HttpRequest
                 .newBuilder()
                 .uri(

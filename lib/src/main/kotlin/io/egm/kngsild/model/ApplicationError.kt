@@ -6,3 +6,4 @@ data class AccessTokenNotRetrieved(override val message: String) : ApplicationEr
 data class AuthenticationServerError(override val message: String) : ApplicationError(message)
 data class ContextBrokerError(override val message: String) : ApplicationError(message)
 data class ResourceNotFound(override val message: String) : ApplicationError(message)
+data class AlreadyExists(override val message: String) : ApplicationError(message)

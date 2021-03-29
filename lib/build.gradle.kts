@@ -4,7 +4,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.16.0"
 
-    kotlin("kapt") version "1.3.61"
+    kotlin("kapt") version "1.4.31"
     `java-library`
     `maven-publish`
 }
@@ -29,8 +29,9 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.0.0")
     implementation("org.slf4j:slf4j-log4j12:1.7.30")
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
+    testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
 version = "0.1.0"
@@ -52,6 +53,10 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "11"
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 java {
