@@ -1,0 +1,17 @@
+{
+   "id":"urn:ngsi-ld:Subscription:01",
+   "type":"Subscription",
+   "description":"This is a subscription sample to sensors",
+   "entities":[
+      {
+         "type":"Sensor"
+      }
+   ],
+   "notification":{
+      "format":"normalized",
+      "endpoint":{
+         "uri":"http://my-domain-name",
+         "accept":"application/json"
+      }
+   }
+}
