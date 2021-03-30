@@ -5,7 +5,10 @@ import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.configureFor
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.noContent
+import com.github.tomakehurst.wiremock.client.WireMock.notFound
 import com.github.tomakehurst.wiremock.client.WireMock.ok
+import com.github.tomakehurst.wiremock.client.WireMock.patch
 import com.github.tomakehurst.wiremock.client.WireMock.reset
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
@@ -26,12 +29,16 @@ import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import java.io.File
 import java.net.URI
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EntityServiceTest {
 
     private lateinit var wireMockServer: WireMockServer
+
+    private val entityAttributesUpdatePayloadFile = javaClass.classLoader
+        .getResource("ngsild/entities/fragments/attributes_update_fragment.json")
 
     @BeforeAll
     fun beforeAll() {
@@ -143,6 +150,76 @@ class EntityServiceTest {
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
+    }
+
+    @Test
+    fun `it should update entity attributes`() {
+        val entityAttributesUpdatePayload = File(entityAttributesUpdatePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            patch(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.updateAttributes(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            entityAttributesUpdatePayload,
+            coreContext
+        )
+
+        assertTrue(response.isRight())
+    }
+
+    @Test
+    fun `it should return a left ContextBrokerError if attributes were not updated`() {
+        val entityAttributesUpdatePayload = File(entityAttributesUpdatePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            patch(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .willReturn(notFound())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.updateAttributes(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            entityAttributesUpdatePayload,
+            coreContext
+        )
+
+        assertTrue(response.isLeft())
     }
 
     private fun gimmeNgsildEntity(id: URI, type: String, attributes: Map<String, Any>): NgsildEntity =

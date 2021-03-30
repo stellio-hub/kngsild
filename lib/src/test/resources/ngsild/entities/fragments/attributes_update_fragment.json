@@ -1,0 +1,6 @@
+{
+   "locatedAt": {
+      "type": "Relationship",
+      "object": "urn:ngsi-ld:City:Paris"
+   }
+}
