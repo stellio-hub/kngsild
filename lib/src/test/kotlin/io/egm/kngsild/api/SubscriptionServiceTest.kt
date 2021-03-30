@@ -149,5 +149,5 @@ class SubscriptionServiceTest {
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
     }
 
-    private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+    private fun <T> any(type: Class<T>): T = Mockito.any(type)
 }

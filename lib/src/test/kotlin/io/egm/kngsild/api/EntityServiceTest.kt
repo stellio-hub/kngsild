@@ -151,5 +151,5 @@ class EntityServiceTest {
             "type" to type
         ).plus(attributes)
 
-    private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
+    private fun <T> any(type: Class<T>): T = Mockito.any(type)
 }
