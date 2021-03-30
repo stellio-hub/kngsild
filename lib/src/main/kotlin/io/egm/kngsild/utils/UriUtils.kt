@@ -12,7 +12,7 @@ object UriUtils {
         try {
             URI(this)
         } catch (e: URISyntaxException) {
-            logger.warn("Unable to parse URI")
+            logger.warn("Unable to parse URI", e)
             null
         }
 }
