@@ -134,7 +134,7 @@ class EntityServiceTest {
         val response = entityService.query(
             "http://localhost:8089",
             "http://localhost:8090",
-            "cli exceptionent_id",
+            "client_id",
             "client_secret",
             "client_credentials",
             emptyMap(),
