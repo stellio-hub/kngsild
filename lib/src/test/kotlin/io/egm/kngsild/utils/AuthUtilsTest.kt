@@ -52,9 +52,7 @@ class AuthUtilsTest {
                 )
         )
 
-        val authUtils = AuthUtils(HttpUtils())
-
-        val response = authUtils.getToken(
+        val response = AuthUtils().getToken(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",
@@ -66,15 +64,13 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return AccessTokenNotRetrieved exception if no access token was retrieved`() {
+    fun `it should return a left AccessTokenNotRetrieved if no access token was retrieved`() {
         stubFor(
             post(urlMatching("/auth"))
                 .willReturn(ok().withBody(serializeObject(emptyMap<String, Any>())))
         )
 
-        val authUtils = AuthUtils(HttpUtils())
-
-        val response = authUtils.getToken(
+        val response = AuthUtils().getToken(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",

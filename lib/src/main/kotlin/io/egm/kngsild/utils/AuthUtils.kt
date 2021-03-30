@@ -6,15 +6,15 @@ import arrow.core.right
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.AuthenticationServerError
+import io.egm.kngsild.utils.HttpUtils.buildFormDataFromMap
+import io.egm.kngsild.utils.HttpUtils.httpClient
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class AuthUtils(
-    private val httpUtils: HttpUtils
-) {
+class AuthUtils {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -28,7 +28,7 @@ class AuthUtils(
             .newBuilder()
             .uri(URI.create(authServerUrl))
             .POST(
-                httpUtils.buildFormDataFromMap(
+                buildFormDataFromMap(
                     mapOf(
                         "client_id" to authClientId,
                         "client_secret" to authClientSecret,
@@ -40,7 +40,7 @@ class AuthUtils(
             .build()
 
         return try {
-            val httpResponse = httpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body()
+            val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body()
             val response: Map<String, String> = JsonUtils.mapper.readValue(
                 httpResponse,
                 JsonUtils.mapper.typeFactory.constructMapLikeType(

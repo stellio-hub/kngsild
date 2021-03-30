@@ -8,7 +8,7 @@ import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
-import io.egm.kngsild.utils.HttpUtils
+import io.egm.kngsild.utils.HttpUtils.httpClient
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
@@ -16,7 +16,6 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class SubscriptionService(
-    private val httpUtils: HttpUtils,
     private val authUtils: AuthUtils
 ) {
 
@@ -36,7 +35,7 @@ class SubscriptionService(
                 .setHeader("Authorization", "Bearer $it")
                 .POST(HttpRequest.BodyPublishers.ofString(subscriptionPayload)).build()
             try {
-                val response = httpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 if (response.statusCode() == HttpURLConnection.HTTP_CREATED)
                     response.right()
                 else if (response.statusCode() == HttpURLConnection.HTTP_CONFLICT)

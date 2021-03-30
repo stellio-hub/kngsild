@@ -4,6 +4,6 @@
   <CurrentIssues>
     <ID>LongParameterList:EntityService.kt$EntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, queryParams: Map&lt;String, String&gt;, contextUrl: String )</ID>
     <ID>LongParameterList:SubscriptionService.kt$SubscriptionService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, subscriptionPayload: String )</ID>
-    <ID>SwallowedException:UriUtils.kt$catch (e: URISyntaxException) { null }</ID>
+    <ID>SwallowedException:UriUtils.kt$UriUtils$catch (e: URISyntaxException) { logger.warn("Unable to parse URI") null }</ID>
   </CurrentIssues>
 </SmellBaseline>

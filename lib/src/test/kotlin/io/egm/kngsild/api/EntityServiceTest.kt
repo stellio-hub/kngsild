@@ -11,13 +11,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
-import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
-import io.egm.kngsild.utils.HttpUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.NgsildUtils.coreContext
-import io.egm.kngsild.utils.toUri
+import io.egm.kngsild.utils.UriUtils.toUri
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -71,7 +69,7 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(HttpUtils(), mockedAuthUtils)
+        val entityService = EntityService(mockedAuthUtils)
 
         val response = entityService.query(
             "http://localhost:8089",
@@ -88,7 +86,7 @@ class EntityServiceTest {
     }
 
     @Test
-    fun `it should return ResourceNotFound exception when requested entities does not exist`() {
+    fun `it should return an empty array if requested entities does not exist`() {
         stubFor(
             get(urlMatching("/ngsi-ld/v1/entities"))
                 .willReturn(ok().withBody(emptyList<NgsildEntity>().toString()))
@@ -103,7 +101,7 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(HttpUtils(), mockedAuthUtils)
+        val entityService = EntityService(mockedAuthUtils)
 
         val response = entityService.query(
             "http://localhost:8089",
@@ -115,12 +113,12 @@ class EntityServiceTest {
             coreContext
         )
 
-        assertTrue(response.isLeft())
-        assertEquals(response, ResourceNotFound("Could not find requested entities").left())
+        assertTrue(response.isRight())
+        assertEquals(response, emptyList<NgsildEntity>().right())
     }
 
     @Test
-    fun `it should return AccessTokenNotRetrieved exception from authUtils if no access token was retrieved`() {
+    fun `it should return a left AccessTokenNotRetrieved from authUtils if no access token was retrieved`() {
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
@@ -131,12 +129,12 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val entityService = EntityService(HttpUtils(), mockedAuthUtils)
+        val entityService = EntityService(mockedAuthUtils)
 
         val response = entityService.query(
             "http://localhost:8089",
             "http://localhost:8090",
-            "client_id",
+            "cli exceptionent_id",
             "client_secret",
             "client_credentials",
             emptyMap(),

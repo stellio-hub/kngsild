@@ -14,7 +14,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.utils.AuthUtils
-import io.egm.kngsild.utils.HttpUtils
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -72,7 +71,7 @@ class SubscriptionServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val subscriptionService = SubscriptionService(HttpUtils(), mockedAuthUtils)
+        val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
@@ -88,7 +87,7 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    fun `it should return AlreadyExists exception when the subscription already exists`() {
+    fun `it should return a left AlreadyExists if the subscription already exists`() {
         val subscriptionPayload = File(subscriptionPayloadFile!!.file)
             .inputStream().readBytes().toString(Charsets.UTF_8)
 
@@ -106,7 +105,7 @@ class SubscriptionServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val subscriptionService = SubscriptionService(HttpUtils(), mockedAuthUtils)
+        val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
@@ -122,7 +121,7 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    fun `it should return AccessTokenNotRetrieved exception from authUtils if no access token was retrieved`() {
+    fun `it should return a left AccessTokenNotRetrieved from authUtils if no access token was retrieved`() {
         val subscriptionPayload = File(subscriptionPayloadFile!!.file)
             .inputStream().readBytes().toString(Charsets.UTF_8)
 
@@ -135,7 +134,7 @@ class SubscriptionServiceTest {
                 any(String::class.java),
             )
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val subscriptionService = SubscriptionService(HttpUtils(), mockedAuthUtils)
+        val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
