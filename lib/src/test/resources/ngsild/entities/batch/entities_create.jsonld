@@ -1,0 +1,20 @@
+[
+   {
+      "id":"urn:ngsi-ld:Building:01",
+      "type":"Building",
+      "@context":[
+         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.3.jsonld"
+      ]
+   },
+   {
+      "id":"urn:ngsi-ld:Building:02",
+      "type":"Building",
+      "locatedAt": {
+         "type": "Relationship",
+         "object": "urn:ngsi-ld:City:Paris"
+      },
+      "@context":[
+         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.3.jsonld"
+      ]
+   }
+]
