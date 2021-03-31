@@ -6,7 +6,6 @@ plugins {
 
     kotlin("kapt") version "1.4.31"
     `java-library`
-    `maven-publish`
 }
 
 repositories {
@@ -33,7 +32,7 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.1.2"
+version = "0.1.3"
 group = "io.egm.kngsild"
 
 tasks.jar {
@@ -60,25 +59,6 @@ tasks.test {
 
 java {
     withSourcesJar()
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("kngsild") {
-            from(components["java"])
-        }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/stellio-hub/kngsild")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
 }
 
 detekt {
