@@ -3,22 +3,16 @@ package io.egm.kngsild.api
 import arrow.core.left
 import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.badRequest
 import com.github.tomakehurst.wiremock.client.WireMock.configureFor
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.noContent
-import com.github.tomakehurst.wiremock.client.WireMock.notFound
-import com.github.tomakehurst.wiremock.client.WireMock.ok
-import com.github.tomakehurst.wiremock.client.WireMock.patch
+import com.github.tomakehurst.wiremock.client.WireMock.created
+import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.reset
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.utils.AuthUtils
-import io.egm.kngsild.utils.JsonUtils.serializeObject
-import io.egm.kngsild.utils.NgsildEntity
-import io.egm.kngsild.utils.NgsildUtils.coreContext
-import io.egm.kngsild.utils.UriUtils.toUri
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,15 +24,16 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
-import java.net.URI
+import java.net.HttpURLConnection
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EntityServiceTest {
+class BatchEntityServiceTest {
 
     private lateinit var wireMockServer: WireMockServer
-
-    private val entityAttributesUpdatePayloadFile = javaClass.classLoader
-        .getResource("ngsild/entities/fragments/attributes_update_fragment.json")
+    private val batchEntityCreatePayloadFile = javaClass.classLoader
+        .getResource("ngsild/entities/batch/entities_create.jsonld")
+    private val batchEntityUpsertPayloadFile = javaClass.classLoader
+        .getResource("ngsild/entities/batch/entities_upsert.jsonld")
 
     @BeforeAll
     fun beforeAll() {
@@ -59,12 +54,13 @@ class EntityServiceTest {
     }
 
     @Test
-    fun `it should query entities`() {
-        val firstEntity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", emptyMap())
-        val secondEntity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:02".toUri()!!, "Sensor", emptyMap())
+    fun `it should create a batch of entities`() {
+        val batchEntityPayload = File(batchEntityCreatePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
         stubFor(
-            get(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(ok().withBody(serializeObject(listOf(firstEntity, secondEntity))))
+            post(urlMatching("/ngsi-ld/v1/entityOperations/create"))
+                .willReturn(created())
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -76,27 +72,29 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
 
-        val response = entityService.query(
+        val response = batchEntityService.create(
             "http://localhost:8089",
             "http://localhost:8090",
             "client_id",
             "client_secret",
             "client_credentials",
-            emptyMap(),
-            coreContext
+            batchEntityPayload
         )
 
         assertTrue(response.isRight())
-        assertTrue(response.exists { it.size == 2 })
+        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
     }
 
     @Test
-    fun `it should return an empty array if requested entities does not exist`() {
+    fun `it should return a left ContextBrokerError if entities were not created`() {
+        val batchEntityPayload = File(batchEntityCreatePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
         stubFor(
-            get(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(ok().withBody(emptyList<NgsildEntity>().toString()))
+            post(urlMatching("/ngsi-ld/v1/entityOperations/create"))
+                .willReturn(badRequest())
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -108,24 +106,24 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
 
-        val response = entityService.query(
+        val response = batchEntityService.create(
             "http://localhost:8089",
             "http://localhost:8090",
             "client_id",
             "client_secret",
             "client_credentials",
-            emptyMap(),
-            coreContext
+            batchEntityPayload
         )
 
-        assertTrue(response.isRight())
-        assertEquals(response, emptyList<NgsildEntity>().right())
+        assertTrue(response.isLeft())
     }
 
     @Test
     fun `it should return a left AccessTokenNotRetrieved from authUtils if no access token was retrieved`() {
+        val batchEntityPayload = File(batchEntityCreatePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
@@ -136,16 +134,15 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val entityService = EntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
 
-        val response = entityService.query(
+        val response = batchEntityService.create(
             "http://localhost:8089",
             "http://localhost:8090",
             "client_id",
             "client_secret",
             "client_credentials",
-            emptyMap(),
-            coreContext
+            batchEntityPayload
         )
 
         assertTrue(response.isLeft())
@@ -153,13 +150,13 @@ class EntityServiceTest {
     }
 
     @Test
-    fun `it should update entity attributes`() {
-        val entityAttributesUpdatePayload = File(entityAttributesUpdatePayloadFile!!.file)
+    fun `it should upsert a batch of entities`() {
+        val batchEntityPayload = File(batchEntityUpsertPayloadFile!!.file)
             .inputStream().readBytes().toString(Charsets.UTF_8)
 
         stubFor(
-            patch(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
-                .willReturn(noContent())
+            post(urlMatching("/ngsi-ld/v1/entityOperations/upsert"))
+                .willReturn(created())
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -171,30 +168,29 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
 
-        val response = entityService.updateAttributes(
+        val response = batchEntityService.upsert(
             "http://localhost:8089",
             "http://localhost:8090",
             "client_id",
             "client_secret",
             "client_credentials",
-            "urn:ngsi-ld:Building:01".toUri()!!,
-            entityAttributesUpdatePayload,
-            coreContext
+            batchEntityPayload
         )
 
         assertTrue(response.isRight())
+        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
     }
 
     @Test
-    fun `it should return a left ContextBrokerError if attributes were not updated`() {
-        val entityAttributesUpdatePayload = File(entityAttributesUpdatePayloadFile!!.file)
+    fun `it should return a left ContextBrokerError if entities were not upserted`() {
+        val batchEntityPayload = File(batchEntityUpsertPayloadFile!!.file)
             .inputStream().readBytes().toString(Charsets.UTF_8)
 
         stubFor(
-            patch(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
-                .willReturn(notFound())
+            post(urlMatching("/ngsi-ld/v1/entityOperations/upsert"))
+                .willReturn(badRequest())
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -206,27 +202,48 @@ class EntityServiceTest {
                 any(String::class.java),
             )
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
 
-        val response = entityService.updateAttributes(
+        val response = batchEntityService.upsert(
             "http://localhost:8089",
             "http://localhost:8090",
             "client_id",
             "client_secret",
             "client_credentials",
-            "urn:ngsi-ld:Building:01".toUri()!!,
-            entityAttributesUpdatePayload,
-            coreContext
+            batchEntityPayload
         )
 
         assertTrue(response.isLeft())
     }
 
-    private fun gimmeNgsildEntity(id: URI, type: String, attributes: Map<String, Any>): NgsildEntity =
-        mapOf(
-            "id" to id,
-            "type" to type
-        ).plus(attributes)
+    @Test
+    fun `it should return a left AccessTokenNotRetrieved from authUtils if no access token was retrieved for upsert`() {
+        val batchEntityPayload = File(batchEntityUpsertPayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
+
+        val response = batchEntityService.upsert(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            batchEntityPayload
+        )
+
+        assertTrue(response.isLeft())
+        assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
+    }
 
     private fun <T> any(type: Class<T>): T = Mockito.any(type)
 }
