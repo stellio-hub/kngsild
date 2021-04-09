@@ -22,7 +22,7 @@ class BatchEntityService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val HTTP_MULTI_STATUS = 207
+    private val httpMultiStatus = 207
     private val batchCreationSuccessCodes = listOf(HttpURLConnection.HTTP_OK, HttpURLConnection.HTTP_CREATED)
     private val batchUpsertSuccessCodes = listOf(
         HttpURLConnection.HTTP_CREATED,
@@ -30,7 +30,7 @@ class BatchEntityService(
     )
     private val batchDeleteSuccessCodes = listOf(
         HttpURLConnection.HTTP_NO_CONTENT,
-        HTTP_MULTI_STATUS
+        httpMultiStatus
     )
 
     fun create(

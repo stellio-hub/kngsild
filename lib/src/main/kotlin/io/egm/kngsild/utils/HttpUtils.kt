@@ -11,8 +11,8 @@ object HttpUtils {
         .version(HttpClient.Version.HTTP_2)
         .build()
 
-    val APPLICATION_JSON = "application/json"
-    val APPLICATION_JSONLD = "application/ld+json"
+    const val APPLICATION_JSON = "application/json"
+    const val APPLICATION_JSONLD = "application/ld+json"
 
     fun buildFormDataFromMap(data: Map<String, String>): HttpRequest.BodyPublisher {
         return HttpRequest.BodyPublishers.ofString(paramsUrlBuilder(data))

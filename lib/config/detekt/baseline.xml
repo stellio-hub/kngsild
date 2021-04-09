@@ -7,8 +7,5 @@
     <ID>LongParameterList:EntityService.kt$EntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, queryParams: Map&lt;String, String&gt;, contextUrl: String )</ID>
     <ID>LongParameterList:SubscriptionService.kt$SubscriptionService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, subscriptionPayload: String )</ID>
     <ID>MagicNumber:BatchEntityService.kt$BatchEntityService$207</ID>
-    <ID>MayBeConst:HttpUtils.kt$HttpUtils$val APPLICATION_JSON = "application/json"</ID>
-    <ID>MayBeConst:HttpUtils.kt$HttpUtils$val APPLICATION_JSONLD = "application/ld+json"</ID>
-    <ID>VariableNaming:BatchEntityService.kt$BatchEntityService$private val HTTP_MULTI_STATUS = 207</ID>
   </CurrentIssues>
 </SmellBaseline>
