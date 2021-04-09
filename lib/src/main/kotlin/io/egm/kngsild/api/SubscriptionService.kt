@@ -8,6 +8,7 @@ import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
+import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -31,7 +32,7 @@ class SubscriptionService(
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/subscriptions")
             )
-                .setHeader("Content-Type", "application/ld+json")
+                .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
                 .POST(HttpRequest.BodyPublishers.ofString(subscriptionPayload)).build()
             try {

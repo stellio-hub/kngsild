@@ -7,6 +7,8 @@ import arrow.core.right
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
+import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
+import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -19,12 +21,19 @@ class BatchEntityService(
     private val authUtils: AuthUtils
 ) {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    companion object {
+        private const val HTTP_MULTI_STATUS = 207
+    }
 
+    private val logger = LoggerFactory.getLogger(javaClass)
     private val batchCreationSuccessCodes = listOf(HttpURLConnection.HTTP_OK, HttpURLConnection.HTTP_CREATED)
     private val batchUpsertSuccessCodes = listOf(
         HttpURLConnection.HTTP_CREATED,
         HttpURLConnection.HTTP_NO_CONTENT
+    )
+    private val batchDeleteSuccessCodes = listOf(
+        HttpURLConnection.HTTP_NO_CONTENT,
+        HTTP_MULTI_STATUS
     )
 
     fun create(
@@ -39,7 +48,7 @@ class BatchEntityService(
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/create")
             )
-                .setHeader("Content-Type", "application/ld+json")
+                .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
                 .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
 
@@ -72,7 +81,7 @@ class BatchEntityService(
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/upsert")
             )
-                .setHeader("Content-Type", "application/ld+json")
+                .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
                 .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
 
@@ -81,6 +90,39 @@ class BatchEntityService(
                 logger.debug("Http response status code: ${response.statusCode()}")
                 logger.debug("Http response body: ${response.body()}")
                 if (batchUpsertSuccessCodes.contains(response.statusCode()))
+                    response.right()
+                else
+                    ContextBrokerError(
+                        "Received ${response.statusCode()} (${response.body()}) from context broker"
+                    ).left()
+            } catch (e: IOException) {
+                val errorMessage = e.message ?: "Error encountered while sending entities to context broker"
+                ContextBrokerError(errorMessage).left()
+            }
+        }
+    }
+
+    fun delete(
+        brokerUrl: String,
+        authServerUrl: String,
+        authClientId: String,
+        authClientSecret: String,
+        authGrantType: String,
+        payload: String
+    ): Either<ApplicationError, HttpResponse<String>> {
+        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+            val request = HttpRequest.newBuilder().uri(
+                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/delete")
+            )
+                .setHeader("Content-Type", APPLICATION_JSON)
+                .setHeader("Authorization", "Bearer $it")
+                .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
+
+            try {
+                val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                logger.debug("Http response status code: ${response.statusCode()}")
+                logger.debug("Http response body: ${response.body()}")
+                if (batchDeleteSuccessCodes.contains(response.statusCode()))
                     response.right()
                 else
                     ContextBrokerError(
