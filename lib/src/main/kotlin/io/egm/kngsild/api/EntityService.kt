@@ -7,6 +7,8 @@ import arrow.core.right
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
+import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
+import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
 import io.egm.kngsild.utils.HttpUtils.paramsUrlBuilder
@@ -42,7 +44,7 @@ class EntityService(
                 .uri(
                     URI.create("$brokerUrl/ngsi-ld/v1/entities$params")
                 )
-                .setHeader("Accept", "application/ld+json")
+                .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
                 .GET().build()
@@ -85,8 +87,8 @@ class EntityService(
                         .create("$brokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
                 )
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(attributesPayload))
-                .setHeader("Content-Type", "application/json")
-                .setHeader("Accept", "application/json")
+                .setHeader("Content-Type", APPLICATION_JSON)
+                .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
                 .build()

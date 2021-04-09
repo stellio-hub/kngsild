@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.badRequest
 import com.github.tomakehurst.wiremock.client.WireMock.configureFor
 import com.github.tomakehurst.wiremock.client.WireMock.created
+import com.github.tomakehurst.wiremock.client.WireMock.noContent
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.reset
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
@@ -34,6 +35,8 @@ class BatchEntityServiceTest {
         .getResource("ngsild/entities/batch/entities_create.jsonld")
     private val batchEntityUpsertPayloadFile = javaClass.classLoader
         .getResource("ngsild/entities/batch/entities_upsert.jsonld")
+    private val batchEntityDeletePayloadFile = javaClass.classLoader
+        .getResource("ngsild/entities/batch/entities_delete.json")
 
     @BeforeAll
     fun beforeAll() {
@@ -243,6 +246,73 @@ class BatchEntityServiceTest {
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
+    }
+
+    @Test
+    fun `it should delete a batch of entities`() {
+        val batchEntityPayload = File(batchEntityDeletePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entityOperations/delete"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
+
+        val response = batchEntityService.delete(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            batchEntityPayload
+        )
+
+        assertTrue(response.isRight())
+        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_NO_CONTENT })
+    }
+
+    @Test
+    fun `it should return a left ContextBrokerError if entities were not deleted`() {
+        val batchEntityPayload = File(batchEntityDeletePayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entityOperations/delete"))
+                .willReturn(badRequest())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val batchEntityService = BatchEntityService(mockedAuthUtils)
+
+        val response = batchEntityService.delete(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            batchEntityPayload
+        )
+
+        assertTrue(response.isLeft())
     }
 
     private fun <T> any(type: Class<T>): T = Mockito.any(type)
