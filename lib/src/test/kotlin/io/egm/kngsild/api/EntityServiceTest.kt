@@ -3,6 +3,7 @@ package io.egm.kngsild.api
 import arrow.core.left
 import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.configureFor
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.noContent
@@ -14,6 +15,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
+import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsildEntity
@@ -30,6 +32,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URI
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,6 +40,7 @@ class EntityServiceTest {
 
     private lateinit var wireMockServer: WireMockServer
 
+    private val entityPayloadFile = javaClass.classLoader.getResource("ngsild/entities/entity.jsonld")
     private val entityAttributesUpdatePayloadFile = javaClass.classLoader
         .getResource("ngsild/entities/fragments/attributes_update_fragment.json")
 
@@ -56,6 +60,72 @@ class EntityServiceTest {
     @AfterAll
     fun afterAll() {
         wireMockServer.stop()
+    }
+
+    @Test
+    fun `it should create an entity`() {
+        val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            WireMock.post(urlMatching("/ngsi-ld/v1/entities"))
+                .willReturn(WireMock.created())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.create(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            entityPayload
+        )
+
+        assertTrue(response.isRight())
+        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
+    }
+
+    @Test
+    fun `it should return a left AlreadyExists if the entity already exists`() {
+        val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            WireMock.post(urlMatching("/ngsi-ld/v1/entities"))
+                .willReturn(WireMock.aResponse().withStatus(409))
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.create(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            entityPayload
+        )
+
+        assertTrue(response.isLeft())
+        assertEquals(response, AlreadyExists("Entity already exists").left())
     }
 
     @Test
