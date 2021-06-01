@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>LongParameterList:BatchEntityService.kt$BatchEntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, payload: String )</ID>
     <ID>LongParameterList:EntityService.kt$EntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, entityId: URI, attributesPayload: String, contextUrl: String )</ID>
+    <ID>LongParameterList:EntityService.kt$EntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, entityPayload: String )</ID>
     <ID>LongParameterList:EntityService.kt$EntityService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, queryParams: Map&lt;String, String&gt;, contextUrl: String )</ID>
     <ID>LongParameterList:SubscriptionService.kt$SubscriptionService$( brokerUrl: String, authServerUrl: String, authClientId: String, authClientSecret: String, authGrantType: String, subscriptionPayload: String )</ID>
   </CurrentIssues>
