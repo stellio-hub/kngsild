@@ -7,6 +7,7 @@ import arrow.core.right
 import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
+import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
@@ -14,6 +15,7 @@ import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
 import io.egm.kngsild.utils.HttpUtils.paramsUrlBuilder
 import io.egm.kngsild.utils.JsonUtils
+import io.egm.kngsild.utils.JsonUtils.deserializeObject
 import io.egm.kngsild.utils.NgsildEntity
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -95,6 +97,49 @@ class EntityService(
 
                 val res = response as List<NgsildEntity>
                 res.right()
+            } catch (e: IOException) {
+                val errorMessage = e.message ?: "Error encountered while processing GET request"
+                ContextBrokerError(errorMessage).left()
+            }
+        }
+    }
+
+    fun retrieve(
+        brokerUrl: String,
+        authServerUrl: String,
+        authClientId: String,
+        authClientSecret: String,
+        authGrantType: String,
+        entityId: URI,
+        queryParams: Map<String, String>,
+        contextUrl: String
+    ): Either<ApplicationError, NgsildEntity> {
+        val params: String = paramsUrlBuilder(queryParams)
+        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+            val request = HttpRequest
+                .newBuilder()
+                .uri(
+                    URI.create("$brokerUrl/ngsi-ld/v1/entities/$entityId$params")
+                )
+                .setHeader("Accept", APPLICATION_JSONLD)
+                .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
+                .setHeader("Authorization", "Bearer $it")
+                .GET().build()
+
+            try {
+                logger.debug("Issuing retrieve: /ngsi-ld/v1/entities/$entityId$params")
+                val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                logger.debug("Http response status code: ${httpResponse.statusCode()}")
+                logger.debug("Http response body: ${httpResponse.body()}")
+
+                if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK)
+                    deserializeObject(httpResponse.body()).right()
+                else if (httpResponse.statusCode() == HttpURLConnection.HTTP_NOT_FOUND)
+                    ResourceNotFound("Entity not found").left()
+                else ContextBrokerError(
+                    "Failed to retrieve entity, " +
+                        "received ${httpResponse.statusCode()} (${httpResponse.body()}) from context broker"
+                ).left()
             } catch (e: IOException) {
                 val errorMessage = e.message ?: "Error encountered while processing GET request"
                 ContextBrokerError(errorMessage).left()

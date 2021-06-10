@@ -32,7 +32,8 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.1.6"
+
+version = "0.1.7"
 group = "io.egm.kngsild"
 
 tasks.jar {

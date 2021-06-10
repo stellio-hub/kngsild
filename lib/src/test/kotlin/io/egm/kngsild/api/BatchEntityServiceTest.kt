@@ -179,7 +179,8 @@ class BatchEntityServiceTest {
             "client_id",
             "client_secret",
             "client_credentials",
-            batchEntityPayload
+            batchEntityPayload,
+            emptyMap()
         )
 
         assertTrue(response.isRight())
@@ -213,7 +214,8 @@ class BatchEntityServiceTest {
             "client_id",
             "client_secret",
             "client_credentials",
-            batchEntityPayload
+            batchEntityPayload,
+            emptyMap()
         )
 
         assertTrue(response.isLeft())
@@ -241,7 +243,8 @@ class BatchEntityServiceTest {
             "client_id",
             "client_secret",
             "client_credentials",
-            batchEntityPayload
+            batchEntityPayload,
+            emptyMap()
         )
 
         assertTrue(response.isLeft())

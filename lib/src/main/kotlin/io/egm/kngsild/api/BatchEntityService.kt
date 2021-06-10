@@ -7,6 +7,7 @@ import arrow.core.right
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
+import io.egm.kngsild.utils.HttpUtils
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.httpClient
@@ -75,11 +76,13 @@ class BatchEntityService(
         authClientId: String,
         authClientSecret: String,
         authGrantType: String,
-        payload: String
+        payload: String,
+        queryParams: Map<String, String>
     ): Either<ApplicationError, HttpResponse<String>> {
+        val params: String = HttpUtils.paramsUrlBuilder(queryParams)
         return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/upsert")
+                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/upsert$params")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")

@@ -16,6 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.model.AlreadyExists
+import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsildEntity
@@ -220,6 +221,73 @@ class EntityServiceTest {
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
+    }
+
+    @Test
+    fun `it should retrieve an entity`() {
+        val entity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", emptyMap())
+        stubFor(
+            get(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Sensor:01"))
+                .willReturn(ok().withBody(serializeObject(entity)))
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.retrieve(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            "urn:ngsi-ld:Sensor:01".toUri()!!,
+            emptyMap(),
+            coreContext
+        )
+
+        assertTrue(response.isRight())
+        assertTrue(response.exists { it["id"] == "urn:ngsi-ld:Sensor:01" })
+    }
+
+    @Test
+    fun `it should return a left ResourceNotFound if the entity is not found`() {
+        stubFor(
+            get(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Sensor:01"))
+                .willReturn(notFound())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken(
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+                any(String::class.java),
+            )
+        ).thenReturn("token".right())
+        val entityService = EntityService(mockedAuthUtils)
+
+        val response = entityService.retrieve(
+            "http://localhost:8089",
+            "http://localhost:8090",
+            "client_id",
+            "client_secret",
+            "client_credentials",
+            "urn:ngsi-ld:Sensor:01".toUri()!!,
+            emptyMap(),
+            coreContext
+        )
+
+        assertTrue(response.isLeft())
+        assertEquals(response, ResourceNotFound("Entity not found").left())
     }
 
     @Test
