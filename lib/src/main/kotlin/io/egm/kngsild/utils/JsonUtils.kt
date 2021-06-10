@@ -14,4 +14,10 @@ object JsonUtils {
 
     fun serializeObject(input: Any): String =
         mapper.writeValueAsString(input)
+
+    fun deserializeObject(input: String): Map<String, Any> =
+        mapper.readValue(
+            input,
+            mapper.typeFactory.constructMapLikeType(Map::class.java, String::class.java, Any::class.java)
+        )
 }
