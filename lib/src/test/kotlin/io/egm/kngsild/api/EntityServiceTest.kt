@@ -20,7 +20,7 @@ import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsildEntity
-import io.egm.kngsild.utils.NgsildUtils.coreContext
+import io.egm.kngsild.utils.NgsiLdUtils.coreContext
 import io.egm.kngsild.utils.UriUtils.toUri
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
