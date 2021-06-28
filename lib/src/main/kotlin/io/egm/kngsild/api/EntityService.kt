@@ -33,13 +33,9 @@ class EntityService(
 
     fun create(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         entityPayload: String
     ): Either<ApplicationError, HttpResponse<String>> {
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entities")
             )
@@ -65,15 +61,11 @@ class EntityService(
 
     fun query(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         queryParams: Map<String, String>,
         contextUrl: String
     ): Either<ApplicationError, List<NgsildEntity>> {
         val params: String = paramsUrlBuilder(queryParams)
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest
                 .newBuilder()
                 .uri(
@@ -106,16 +98,12 @@ class EntityService(
 
     fun retrieve(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         entityId: URI,
         queryParams: Map<String, String>,
         contextUrl: String
     ): Either<ApplicationError, NgsildEntity> {
         val params: String = paramsUrlBuilder(queryParams)
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest
                 .newBuilder()
                 .uri(
@@ -149,15 +137,11 @@ class EntityService(
 
     fun updateAttributes(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         entityId: URI,
         attributesPayload: String,
         contextUrl: String
     ): Either<ApplicationError, String?> {
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest
                 .newBuilder()
                 .uri(

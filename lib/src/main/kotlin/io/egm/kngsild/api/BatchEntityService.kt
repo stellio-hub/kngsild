@@ -39,13 +39,9 @@ class BatchEntityService(
 
     fun create(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         payload: String
     ): Either<ApplicationError, HttpResponse<String>> {
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/create")
             )
@@ -72,15 +68,11 @@ class BatchEntityService(
 
     fun upsert(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         payload: String,
         queryParams: Map<String, String>
     ): Either<ApplicationError, HttpResponse<String>> {
         val params: String = HttpUtils.paramsUrlBuilder(queryParams)
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/upsert$params")
             )
@@ -107,13 +99,9 @@ class BatchEntityService(
 
     fun delete(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         payload: String
     ): Either<ApplicationError, HttpResponse<String>> {
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/delete")
             )

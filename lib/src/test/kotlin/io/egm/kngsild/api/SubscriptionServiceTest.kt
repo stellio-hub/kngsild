@@ -64,21 +64,12 @@ class SubscriptionServiceTest {
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
-            mockedAuthUtils.getToken(
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-            )
+            mockedAuthUtils.getToken()
         ).thenReturn("token".right())
         val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
-            "http://localhost:8090",
-            "client_id",
-            "client_secret",
-            "client_credentials",
             subscriptionPayload
         )
 
@@ -98,21 +89,12 @@ class SubscriptionServiceTest {
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
-            mockedAuthUtils.getToken(
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-            )
+            mockedAuthUtils.getToken()
         ).thenReturn("token".right())
         val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
-            "http://localhost:8090",
-            "client_id",
-            "client_secret",
-            "client_credentials",
             subscriptionPayload
         )
 
@@ -127,21 +109,12 @@ class SubscriptionServiceTest {
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
-            mockedAuthUtils.getToken(
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-                any(String::class.java),
-            )
+            mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
         val subscriptionService = SubscriptionService(mockedAuthUtils)
 
         val response = subscriptionService.create(
             "http://localhost:8089",
-            "http://localhost:8090",
-            "client_id",
-            "client_secret",
-            "client_credentials",
             subscriptionPayload
         )
 

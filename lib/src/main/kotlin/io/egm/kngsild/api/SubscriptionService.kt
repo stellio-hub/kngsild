@@ -22,13 +22,9 @@ class SubscriptionService(
 
     fun create(
         brokerUrl: String,
-        authServerUrl: String,
-        authClientId: String,
-        authClientSecret: String,
-        authGrantType: String,
         subscriptionPayload: String
     ): Either<ApplicationError, HttpResponse<String>> {
-        return authUtils.getToken(authServerUrl, authClientId, authClientSecret, authGrantType).flatMap {
+        return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$brokerUrl/ngsi-ld/v1/subscriptions")
             )

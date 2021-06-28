@@ -52,12 +52,12 @@ class AuthUtilsTest {
                 )
         )
 
-        val response = AuthUtils().getToken(
+        val response = AuthUtils(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",
             "client_credentials"
-        )
+        ).getToken()
 
         assertTrue(response.isRight())
         assertEquals(response, "token".right())
@@ -70,12 +70,12 @@ class AuthUtilsTest {
                 .willReturn(ok().withBody(serializeObject(emptyMap<String, Any>())))
         )
 
-        val response = AuthUtils().getToken(
+        val response = AuthUtils(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",
             "client_credentials"
-        )
+        ).getToken()
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
