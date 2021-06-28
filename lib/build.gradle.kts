@@ -6,6 +6,7 @@ plugins {
 
     kotlin("kapt") version "1.4.31"
     `java-library`
+    maven
 }
 
 repositories {
@@ -33,7 +34,7 @@ dependencies {
 }
 
 
-version = "0.1.7"
+version = "0.1.8"
 group = "io.egm.kngsild"
 
 tasks.jar {
