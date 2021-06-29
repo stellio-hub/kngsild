@@ -66,12 +66,9 @@ class SubscriptionServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val subscriptionService = SubscriptionService(mockedAuthUtils)
+        val subscriptionService = SubscriptionService("http://localhost:8089", mockedAuthUtils)
 
-        val response = subscriptionService.create(
-            "http://localhost:8089",
-            subscriptionPayload
-        )
+        val response = subscriptionService.create(subscriptionPayload)
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
@@ -91,12 +88,9 @@ class SubscriptionServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val subscriptionService = SubscriptionService(mockedAuthUtils)
+        val subscriptionService = SubscriptionService("http://localhost:8089", mockedAuthUtils)
 
-        val response = subscriptionService.create(
-            "http://localhost:8089",
-            subscriptionPayload
-        )
+        val response = subscriptionService.create(subscriptionPayload)
 
         assertTrue(response.isLeft())
         assertEquals(response, AlreadyExists("Subscription already exists").left())
@@ -111,12 +105,9 @@ class SubscriptionServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val subscriptionService = SubscriptionService(mockedAuthUtils)
+        val subscriptionService = SubscriptionService("http://localhost:8089", mockedAuthUtils)
 
-        val response = subscriptionService.create(
-            "http://localhost:8089",
-            subscriptionPayload
-        )
+        val response = subscriptionService.create(subscriptionPayload)
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())

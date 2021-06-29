@@ -17,16 +17,16 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class SubscriptionService(
+    private val contextBrokerUrl: String,
     private val authUtils: AuthUtils
 ) {
 
     fun create(
-        brokerUrl: String,
         subscriptionPayload: String
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/subscriptions")
+                URI.create("$contextBrokerUrl/ngsi-ld/v1/subscriptions")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")

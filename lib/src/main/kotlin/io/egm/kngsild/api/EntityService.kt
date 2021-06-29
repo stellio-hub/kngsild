@@ -25,6 +25,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class EntityService(
+    private val contextBrokerUrl: String,
     private val authUtils: AuthUtils
 ) {
 
@@ -32,26 +33,25 @@ class EntityService(
     private val patchSuccessCode = listOf(HttpURLConnection.HTTP_NO_CONTENT)
 
     fun create(
-        brokerUrl: String,
         entityPayload: String
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/entities")
+                URI.create("$contextBrokerUrl/ngsi-ld/v1/entities")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
                 .POST(HttpRequest.BodyPublishers.ofString(entityPayload)).build()
             try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                if (response.statusCode() == HttpURLConnection.HTTP_CREATED)
-                    response.right()
-                else if (response.statusCode() == HttpURLConnection.HTTP_CONFLICT)
-                    AlreadyExists("Entity already exists").left()
-                else ContextBrokerError(
-                    "Failed to create entity, " +
-                        "received ${response.statusCode()} (${response.body()}) from context broker"
-                ).left()
+                when {
+                    response.statusCode() == HttpURLConnection.HTTP_CREATED -> response.right()
+                    response.statusCode() == HttpURLConnection.HTTP_CONFLICT -> AlreadyExists("Entity already exists").left()
+                    else -> ContextBrokerError(
+                        "Failed to create entity, " +
+                                "received ${response.statusCode()} (${response.body()}) from context broker"
+                    ).left()
+                }
             } catch (e: IOException) {
                 val errorMessage = e.message ?: "Error encountered while creating entity in context broker"
                 ContextBrokerError(errorMessage).left()
@@ -60,7 +60,6 @@ class EntityService(
     }
 
     fun query(
-        brokerUrl: String,
         queryParams: Map<String, String>,
         contextUrl: String
     ): Either<ApplicationError, List<NgsildEntity>> {
@@ -69,7 +68,7 @@ class EntityService(
             val request = HttpRequest
                 .newBuilder()
                 .uri(
-                    URI.create("$brokerUrl/ngsi-ld/v1/entities$params")
+                    URI.create("$contextBrokerUrl/ngsi-ld/v1/entities$params")
                 )
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
@@ -97,7 +96,6 @@ class EntityService(
     }
 
     fun retrieve(
-        brokerUrl: String,
         entityId: URI,
         queryParams: Map<String, String>,
         contextUrl: String
@@ -107,7 +105,7 @@ class EntityService(
             val request = HttpRequest
                 .newBuilder()
                 .uri(
-                    URI.create("$brokerUrl/ngsi-ld/v1/entities/$entityId$params")
+                    URI.create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId$params")
                 )
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
@@ -136,7 +134,6 @@ class EntityService(
     }
 
     fun updateAttributes(
-        brokerUrl: String,
         entityId: URI,
         attributesPayload: String,
         contextUrl: String
@@ -146,7 +143,7 @@ class EntityService(
                 .newBuilder()
                 .uri(
                     URI
-                        .create("$brokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
+                        .create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
                 )
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(attributesPayload))
                 .setHeader("Content-Type", APPLICATION_JSON)

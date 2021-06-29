@@ -76,12 +76,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.create(
-            "http://localhost:8089",
-            entityPayload
-        )
+        val response = entityService.create(entityPayload)
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
@@ -100,12 +97,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.create(
-            "http://localhost:8089",
-            entityPayload
-        )
+        val response = entityService.create(entityPayload)
 
         assertTrue(response.isLeft())
         assertEquals(response, AlreadyExists("Entity already exists").left())
@@ -124,13 +118,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.query(
-            "http://localhost:8089",
-            emptyMap(),
-            coreContext
-        )
+        val response = entityService.query(emptyMap(), coreContext)
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.size == 2 })
@@ -147,13 +137,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.query(
-            "http://localhost:8089",
-            emptyMap(),
-            coreContext
-        )
+        val response = entityService.query(emptyMap(), coreContext)
 
         assertTrue(response.isRight())
         assertEquals(response, emptyList<NgsildEntity>().right())
@@ -166,13 +152,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089",mockedAuthUtils)
 
-        val response = entityService.query(
-            "http://localhost:8089",
-            emptyMap(),
-            coreContext
-        )
+        val response = entityService.query(emptyMap(), coreContext)
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
@@ -190,10 +172,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
         val response = entityService.retrieve(
-            "http://localhost:8089",
             "urn:ngsi-ld:Sensor:01".toUri()!!,
             emptyMap(),
             coreContext
@@ -214,10 +195,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
         val response = entityService.retrieve(
-            "http://localhost:8089",
             "urn:ngsi-ld:Sensor:01".toUri()!!,
             emptyMap(),
             coreContext
@@ -241,10 +221,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
         val response = entityService.updateAttributes(
-            "http://localhost:8089",
             "urn:ngsi-ld:Building:01".toUri()!!,
             entityAttributesUpdatePayload,
             coreContext
@@ -267,10 +246,9 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val entityService = EntityService(mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
         val response = entityService.updateAttributes(
-            "http://localhost:8089",
             "urn:ngsi-ld:Building:01".toUri()!!,
             entityAttributesUpdatePayload,
             coreContext

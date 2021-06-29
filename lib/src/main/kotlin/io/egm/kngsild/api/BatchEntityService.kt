@@ -19,6 +19,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 class BatchEntityService(
+    private val contextBrokerUrl: String,
     private val authUtils: AuthUtils
 ) {
 
@@ -38,12 +39,11 @@ class BatchEntityService(
     )
 
     fun create(
-        brokerUrl: String,
         payload: String
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/create")
+                URI.create("$contextBrokerUrl/ngsi-ld/v1/entityOperations/create")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
@@ -67,14 +67,13 @@ class BatchEntityService(
     }
 
     fun upsert(
-        brokerUrl: String,
         payload: String,
         queryParams: Map<String, String>
     ): Either<ApplicationError, HttpResponse<String>> {
         val params: String = HttpUtils.paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/upsert$params")
+                URI.create("$contextBrokerUrl/ngsi-ld/v1/entityOperations/upsert$params")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
@@ -98,12 +97,11 @@ class BatchEntityService(
     }
 
     fun delete(
-        brokerUrl: String,
         payload: String
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$brokerUrl/ngsi-ld/v1/entityOperations/delete")
+                URI.create("$contextBrokerUrl/ngsi-ld/v1/entityOperations/delete")
             )
                 .setHeader("Content-Type", APPLICATION_JSON)
                 .setHeader("Authorization", "Bearer $it")

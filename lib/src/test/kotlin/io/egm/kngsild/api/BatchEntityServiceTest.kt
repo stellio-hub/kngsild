@@ -71,12 +71,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.create(
-            "http://localhost:8089",
-            batchEntityPayload
-        )
+        val response = batchEntityService.create(batchEntityPayload)
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
@@ -96,12 +93,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.create(
-            "http://localhost:8089",
-            batchEntityPayload
-        )
+        val response = batchEntityService.create(batchEntityPayload)
 
         assertTrue(response.isLeft())
     }
@@ -115,12 +109,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.create(
-            "http://localhost:8089",
-            batchEntityPayload
-        )
+        val response = batchEntityService.create(batchEntityPayload)
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
@@ -140,13 +131,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.upsert(
-            "http://localhost:8089",
-            batchEntityPayload,
-            emptyMap()
-        )
+        val response = batchEntityService.upsert(batchEntityPayload, emptyMap())
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
@@ -166,13 +153,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.upsert(
-            "http://localhost:8089",
-            batchEntityPayload,
-            emptyMap()
-        )
+        val response = batchEntityService.upsert(batchEntityPayload, emptyMap())
 
         assertTrue(response.isLeft())
     }
@@ -186,13 +169,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.upsert(
-            "http://localhost:8089",
-            batchEntityPayload,
-            emptyMap()
-        )
+        val response = batchEntityService.upsert(batchEntityPayload, emptyMap())
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
@@ -212,12 +191,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.delete(
-            "http://localhost:8089",
-            batchEntityPayload
-        )
+        val response = batchEntityService.delete(batchEntityPayload)
 
         assertTrue(response.isRight())
         assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_NO_CONTENT })
@@ -237,12 +213,9 @@ class BatchEntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
-        val batchEntityService = BatchEntityService(mockedAuthUtils)
+        val batchEntityService = BatchEntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = batchEntityService.delete(
-            "http://localhost:8089",
-            batchEntityPayload
-        )
+        val response = batchEntityService.delete(batchEntityPayload)
 
         assertTrue(response.isLeft())
     }
