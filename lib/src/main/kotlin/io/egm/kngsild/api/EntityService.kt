@@ -45,12 +45,15 @@ class EntityService(
             try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 when {
-                    response.statusCode() == HttpURLConnection.HTTP_CREATED -> response.right()
-                    response.statusCode() == HttpURLConnection.HTTP_CONFLICT -> AlreadyExists("Entity already exists").left()
-                    else -> ContextBrokerError(
-                        "Failed to create entity, " +
+                    response.statusCode() == HttpURLConnection.HTTP_CREATED ->
+                        response.right()
+                    response.statusCode() == HttpURLConnection.HTTP_CONFLICT ->
+                        AlreadyExists("Entity already exists").left()
+                    else ->
+                        ContextBrokerError(
+                            "Failed to create entity, " +
                                 "received ${response.statusCode()} (${response.body()}) from context broker"
-                    ).left()
+                        ).left()
                 }
             } catch (e: IOException) {
                 val errorMessage = e.message ?: "Error encountered while creating entity in context broker"

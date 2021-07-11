@@ -3,32 +3,19 @@ package io.egm.kngsild.api
 import arrow.core.left
 import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.configureFor
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.noContent
-import com.github.tomakehurst.wiremock.client.WireMock.notFound
-import com.github.tomakehurst.wiremock.client.WireMock.ok
-import com.github.tomakehurst.wiremock.client.WireMock.patch
-import com.github.tomakehurst.wiremock.client.WireMock.reset
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
-import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.NgsiLdUtils.coreContext
+import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.UriUtils.toUri
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
@@ -68,8 +55,8 @@ class EntityServiceTest {
         val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
 
         stubFor(
-            WireMock.post(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(WireMock.created())
+            post(urlMatching("/ngsi-ld/v1/entities"))
+                .willReturn(created())
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -89,8 +76,8 @@ class EntityServiceTest {
         val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
 
         stubFor(
-            WireMock.post(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(WireMock.aResponse().withStatus(409))
+            post(urlMatching("/ngsi-ld/v1/entities"))
+                .willReturn(aResponse().withStatus(409))
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -152,7 +139,7 @@ class EntityServiceTest {
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
-        val entityService = EntityService("http://localhost:8089",mockedAuthUtils)
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
         val response = entityService.query(emptyMap(), coreContext)
 
