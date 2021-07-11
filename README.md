@@ -7,7 +7,7 @@ and you are of course welcome to raise a PR if you implement a new one.
 
 # Building and publishing
 
-The library is published with Jitpack and available in https://jitpack.io/#stellio-hub/kngsild. 
+The library is published with Jitpack and available in https://jitpack.io/#io.egm/kngsild. 
 
 When working locally, you can publish it in your local Maven repository by running the following command:
 
@@ -15,9 +15,5 @@ When working locally, you can publish it in your local Maven repository by runni
 ./gradlew publishToMavenLocal
 ```
 
-It will then be stored in `~/.m2/repository/io/egm/kngsild/<version>/kngsild-<version>.jar` and referencable in a
-Gradle build file with the following dependency statement:
-
-```
-implementation 'io.egm:kngsild:<version>'
-```
+It is then stored in `~/.m2/repository/io/egm/kngsild/<version>/kngsild-<version>.jar` and can be used in your project
+in the same way as when it is published on Jitpack.
