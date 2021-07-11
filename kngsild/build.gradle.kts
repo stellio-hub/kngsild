@@ -6,7 +6,7 @@ plugins {
 
     kotlin("kapt") version "1.4.31"
     `java-library`
-    maven
+    `maven-publish`
 }
 
 repositories {
@@ -19,8 +19,6 @@ repositories {
 val arrowVersion = "0.11.0"
 
 dependencies {
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.arrow-kt:arrow-core:$arrowVersion")
     implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
@@ -33,15 +31,22 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
+version = "0.2.0"
+group = "io.egm"
 
-version = "0.1.8"
-group = "io.egm.kngsild"
+publishing {
+    publications {
+        create<MavenPublication>("kngsild") {
+            from(components["java"])
+        }
+    }
+}
 
 tasks.jar {
     manifest {
         attributes(
             mapOf(
-                "Implementation-Title" to "kngsild",
+                "Implementation-Title" to project.name,
                 "Implementation-Version" to project.version
             )
         )

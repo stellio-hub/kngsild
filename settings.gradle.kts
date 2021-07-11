@@ -8,4 +8,4 @@
  */
 
 rootProject.name = "kngsild"
-include("lib")
+include("kngsild")

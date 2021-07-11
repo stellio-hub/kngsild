@@ -12,12 +12,12 @@ The library is published with Jitpack and available in https://jitpack.io/#stell
 When working locally, you can publish it in your local Maven repository by running the following command:
 
 ```shell
-./gradlew install
+./gradlew publishToMavenLocal
 ```
 
-It will then be stored in `~/.m2/repository/io/egm/kngsild/lib/<version>/lib-<version>.jar` and referencable in a
+It will then be stored in `~/.m2/repository/io/egm/kngsild/<version>/kngsild-<version>.jar` and referencable in a
 Gradle build file with the following dependency statement:
 
 ```
-implementation 'io.egm.kngsild:lib:<version>'
+implementation 'io.egm:kngsild:<version>'
 ```
