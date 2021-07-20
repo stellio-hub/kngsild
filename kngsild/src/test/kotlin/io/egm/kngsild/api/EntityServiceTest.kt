@@ -20,7 +20,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
-import java.net.HttpURLConnection
 import java.net.URI
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -56,7 +55,10 @@ class EntityServiceTest {
 
         stubFor(
             post(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(created())
+                .willReturn(
+                    created()
+                        .withHeader("Location", "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01")
+                )
         )
 
         val mockedAuthUtils = mock(AuthUtils::class.java)
@@ -68,7 +70,7 @@ class EntityServiceTest {
         val response = entityService.create(entityPayload)
 
         assertTrue(response.isRight())
-        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
+        assertTrue(response.exists { it == "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01" })
     }
 
     @Test

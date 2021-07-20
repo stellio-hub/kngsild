@@ -8,15 +8,13 @@ import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.model.ResourceNotFound
-import io.egm.kngsild.utils.AuthUtils
+import io.egm.kngsild.utils.*
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
 import io.egm.kngsild.utils.HttpUtils.paramsUrlBuilder
-import io.egm.kngsild.utils.JsonUtils
 import io.egm.kngsild.utils.JsonUtils.deserializeObject
-import io.egm.kngsild.utils.NgsildEntity
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -34,7 +32,7 @@ class EntityService(
 
     fun create(
         entityPayload: String
-    ): Either<ApplicationError, HttpResponse<String>> {
+    ): Either<ApplicationError, ResourceLocation> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$contextBrokerUrl/ngsi-ld/v1/entities")
@@ -46,7 +44,7 @@ class EntityService(
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 when {
                     response.statusCode() == HttpURLConnection.HTTP_CREATED ->
-                        response.right()
+                        response.headers().firstValue("Location").get().right()
                     response.statusCode() == HttpURLConnection.HTTP_CONFLICT ->
                         AlreadyExists("Entity already exists").left()
                     else ->

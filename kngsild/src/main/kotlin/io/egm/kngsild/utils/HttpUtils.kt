@@ -35,3 +35,5 @@ object HttpUtils {
     fun httpLinkHeaderBuilder(context: String) =
         "<$context>;rel=http://www.w3.org/ns/json-ld#context;type=application/ld+json"
 }
+
+typealias ResourceLocation = String
