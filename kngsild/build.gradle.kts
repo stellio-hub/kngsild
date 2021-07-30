@@ -32,7 +32,7 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.2.0"
+version = "0.3.0-dev"
 group = "io.egm"
 
 publishing {
