@@ -1,9 +1,9 @@
 package io.egm.kngsild.utils
 
 import io.egm.kngsild.utils.UriUtils.toUri
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
 
 class NgsiLdUtilsTest {
 
@@ -43,5 +43,24 @@ class NgsiLdUtilsTest {
         assertTrue(ngsildEntity.hasAttribute("multiAttribute", null))
         assertTrue(ngsildEntity.hasAttribute("multiAttribute", "urn:ngsi-ld:Dataset:123".toUri()))
         assertFalse(ngsildEntity.hasAttribute("multiAttribute", "urn:ngsi-ld:Dataset:456".toUri()))
+    }
+
+    @Test
+    fun `it should build a property`() {
+        val property =
+            NgsiLdPropertyBuilder("temperature")
+                .withValue(31.0)
+                .withObservedAt(ZonedDateTime.now())
+                .withUnitCode("CEL")
+                .withDatasetId("urn:ngsi-ld:Dataset:temperature".toUri())
+                .withSubProperty("reliability", 0.98)
+                .build()
+
+        assertEquals(1, property.keys.size)
+        assertEquals("temperature", property.keys.first())
+        val propertyAttributes = property["temperature"]
+        (propertyAttributes as Map<*,*>?)?.apply {
+            assertEquals(6, this.keys.size)
+        } ?: fail("Property attributes should be a map")
     }
 }

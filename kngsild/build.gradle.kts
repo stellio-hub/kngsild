@@ -24,6 +24,7 @@ dependencies {
     implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
     "kapt"("io.arrow-kt:arrow-meta:$arrowVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.slf4j:slf4j-log4j12:1.7.30")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
