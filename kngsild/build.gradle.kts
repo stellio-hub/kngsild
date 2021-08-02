@@ -25,7 +25,7 @@ dependencies {
     "kapt"("io.arrow-kt:arrow-meta:$arrowVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("org.slf4j:slf4j-log4j12:1.7.30")
+    implementation("ch.qos.logback:logback-classic:1.2.5")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
