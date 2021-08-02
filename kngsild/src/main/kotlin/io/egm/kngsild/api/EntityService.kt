@@ -29,6 +29,7 @@ class EntityService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val patchSuccessCode = listOf(HttpURLConnection.HTTP_NO_CONTENT)
+    private val postSuccessCode = listOf(HttpURLConnection.HTTP_NO_CONTENT)
 
     fun create(
         entityPayload: String
@@ -166,6 +167,43 @@ class EntityService(
             } catch (e: IOException) {
                 logger.warn(e.message ?: "Error encountered while processing PATCH request")
                 val errorMessage = e.message ?: "Error encountered while patching to context broker"
+                ContextBrokerError(errorMessage).left()
+            }
+        }
+    }
+
+    fun appendAttributes(
+        entityId: URI,
+        attributesPayload: String,
+        contextUrl: String
+    ): Either<ApplicationError, String> {
+        return authUtils.getToken().flatMap {
+            val request = HttpRequest
+                .newBuilder()
+                .uri(
+                    URI
+                        .create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
+                )
+                .method("POST", HttpRequest.BodyPublishers.ofString(attributesPayload))
+                .setHeader("Content-Type", APPLICATION_JSON)
+                .setHeader("Accept", APPLICATION_JSON)
+                .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
+                .setHeader("Authorization", "Bearer $it")
+                .build()
+            return try {
+                logger.debug("Appending attributes $attributesPayload to entity $entityId")
+                val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                logger.debug("Http response status code: ${response.statusCode()}")
+                logger.debug("Http response body: ${response.body()}")
+                if (postSuccessCode.contains(response.statusCode()))
+                    response.body().right()
+                else
+                    ContextBrokerError(
+                        "Received ${response.statusCode()} (${response.body()}) from context broker"
+                    ).left()
+            } catch (e: IOException) {
+                logger.warn(e.message ?: "Error encountered while processing POST request")
+                val errorMessage = e.message ?: "Error encountered while posting to context broker"
                 ContextBrokerError(errorMessage).left()
             }
         }

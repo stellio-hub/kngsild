@@ -30,6 +30,8 @@ class EntityServiceTest {
     private val entityPayloadFile = javaClass.classLoader.getResource("ngsild/entities/entity.jsonld")
     private val entityAttributesUpdatePayloadFile = javaClass.classLoader
         .getResource("ngsild/entities/fragments/attributes_update_fragment.json")
+    private val entityAttributesAppendPayloadFile = javaClass.classLoader
+        .getResource("ngsild/entities/fragments/attributes_append_fragment.json")
 
     @BeforeAll
     fun beforeAll() {
@@ -244,6 +246,31 @@ class EntityServiceTest {
         )
 
         assertTrue(response.isLeft())
+    }
+
+    @Test
+    fun `it should append entity attributes`() {
+        val entityAttributesAppendPayload = File(entityAttributesAppendPayloadFile!!.file)
+            .inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken()
+        ).thenReturn("token".right())
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
+
+        val response = entityService.appendAttributes(
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            entityAttributesAppendPayload,
+            coreContext
+        )
+
+        assertTrue(response.isRight())
     }
 
     private fun gimmeNgsildEntity(id: URI, type: String, attributes: Map<String, Any>): NgsildEntity =
