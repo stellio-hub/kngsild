@@ -10,6 +10,7 @@ import io.egm.kngsild.model.AlreadyExists
 import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
+import io.egm.kngsild.utils.NgsiLdAttributeNG
 import io.egm.kngsild.utils.NgsiLdUtils.coreContext
 import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.UriUtils.toUri
@@ -30,8 +31,6 @@ class EntityServiceTest {
     private val entityPayloadFile = javaClass.classLoader.getResource("ngsild/entities/entity.jsonld")
     private val entityAttributesUpdatePayloadFile = javaClass.classLoader
         .getResource("ngsild/entities/fragments/attributes_update_fragment.json")
-    private val entityAttributesAppendPayloadFile = javaClass.classLoader
-        .getResource("ngsild/entities/fragments/attributes_append_fragment.json")
 
     @BeforeAll
     fun beforeAll() {
@@ -249,9 +248,16 @@ class EntityServiceTest {
     }
 
     @Test
-    fun `it should append entity attributes`() {
-        val entityAttributesAppendPayload = File(entityAttributesAppendPayloadFile!!.file)
-            .inputStream().readBytes().toString(Charsets.UTF_8)
+    fun `it should append a single entity attribute`() {
+        val ngsiLdAttribute = listOf(
+            NgsiLdAttributeNG(
+                "volume",
+                mapOf(
+                    "type" to "Property",
+                    "value" to 2.0
+                )
+            )
+        )
 
         stubFor(
             post(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
@@ -266,11 +272,143 @@ class EntityServiceTest {
 
         val response = entityService.appendAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
-            entityAttributesAppendPayload,
+            ngsiLdAttribute,
             coreContext
         )
 
         assertTrue(response.isRight())
+
+        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+            .withRequestBody(
+                equalToJson(
+                    """
+                    {
+                        "volume": {
+                            "type": "Property",
+                            "value": 2.0
+                        }
+                    }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `it should append a multi-instance entity attribute`() {
+        val ngsiLdAttribute = listOf(
+            NgsiLdAttributeNG(
+                "volume",
+                mapOf(
+                    "type" to "Property",
+                    "value" to 2.0
+                )
+            ),
+            NgsiLdAttributeNG(
+                "volume",
+                mapOf(
+                    "type" to "Property",
+                    "value" to 2.0,
+                    "datasetId" to "urn:ngsi-ld:Dataset:123"
+                )
+            )
+        )
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken()
+        ).thenReturn("token".right())
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
+
+        val response = entityService.appendAttributes(
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            ngsiLdAttribute,
+            coreContext
+        )
+
+        assertTrue(response.isRight())
+
+        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+            .withRequestBody(
+                equalToJson(
+                    """
+                    {
+                      "volume": [{
+                        "type": "Property",
+                        "value": 2.0
+                      }, {
+                        "type": "Property",
+                        "value": 2.0,
+                        "datasetId": "urn:ngsi-ld:Dataset:123"
+                      }]
+                    }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `it should append two single instance entity attributes`() {
+        val ngsiLdAttribute = listOf(
+            NgsiLdAttributeNG(
+                "volume",
+                mapOf(
+                    "type" to "Property",
+                    "value" to 2.0
+                )
+            ),
+            NgsiLdAttributeNG(
+                "pressure",
+                mapOf(
+                    "type" to "Property",
+                    "value" to 23.0
+                )
+            )
+        )
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken()
+        ).thenReturn("token".right())
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
+
+        val response = entityService.appendAttributes(
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            ngsiLdAttribute,
+            coreContext
+        )
+
+        assertTrue(response.isRight())
+
+        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+            .withRequestBody(
+                equalToJson(
+                    """
+                    {
+                        "volume": {
+                            "type": "Property",
+                            "value": 2.0
+                        },
+                        "pressure": {
+                            "type": "Property",
+                            "value": 23.0
+                        }                        
+                    }
+                    """.trimIndent()
+                )
+            )
+        )
     }
 
     private fun gimmeNgsildEntity(id: URI, type: String, attributes: Map<String, Any>): NgsildEntity =

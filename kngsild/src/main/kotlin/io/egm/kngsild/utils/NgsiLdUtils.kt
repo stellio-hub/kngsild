@@ -1,5 +1,6 @@
 package io.egm.kngsild.utils
 
+import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.UriUtils.toUri
 import java.net.URI
 import java.time.ZonedDateTime
@@ -7,6 +8,24 @@ import java.time.ZonedDateTime
 typealias NgsildEntity = Map<String, Any>
 typealias NgsildMultiAttribute = List<Map<String, Any>>
 typealias NgsiLdAttribute = Map<String, Any>
+
+data class NgsiLdAttributeNG(
+    val propertyName: String,
+    val propertyValue: Map<String, Any>
+)
+
+fun List<NgsiLdAttributeNG>.serialize(): String =
+    this.groupBy {
+        it.propertyName
+    }.mapValues { entry ->
+        val attributes = entry.value
+        if (attributes.size == 1)
+            attributes[0].propertyValue
+        else
+            this.map { it.propertyValue }
+    }.let {
+        serializeObject(it)
+    }
 
 class NgsiLdPropertyBuilder(
     private val propertyName: String
@@ -48,8 +67,25 @@ class NgsiLdPropertyBuilder(
         return this
     }
 
-    fun build(): NgsiLdAttribute =
-        mapOf(propertyName to attributeMap.plus("type" to "Property"))
+    fun build(): NgsiLdAttributeNG =
+        NgsiLdAttributeNG(propertyName, attributeMap.plus("type" to "Property"))
+}
+
+class NgsiLdEntityBuilder(
+    val id: URI,
+    val type: String,
+    val contexts: List<String> = emptyList()
+) {
+
+    fun build(): NgsildEntity =
+        mapOf("id" to id)
+            .plus("type" to type)
+            .let {
+                if (contexts.isNotEmpty())
+                    it.plus("@context" to contexts)
+                else
+                    it.plus("@context" to NgsiLdUtils.coreContext)
+            }
 }
 
 object NgsiLdUtils {

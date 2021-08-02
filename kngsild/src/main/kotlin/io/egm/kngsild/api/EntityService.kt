@@ -174,24 +174,25 @@ class EntityService(
 
     fun appendAttributes(
         entityId: URI,
-        attributesPayload: String,
+        attributes: List<NgsiLdAttributeNG>,
         contextUrl: String
     ): Either<ApplicationError, String> {
-        return authUtils.getToken().flatMap {
+        return authUtils.getToken().flatMap { token ->
+            val serializedPayload = attributes.serialize()
             val request = HttpRequest
                 .newBuilder()
                 .uri(
                     URI
                         .create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
                 )
-                .method("POST", HttpRequest.BodyPublishers.ofString(attributesPayload))
+                .method("POST", HttpRequest.BodyPublishers.ofString(serializedPayload))
                 .setHeader("Content-Type", APPLICATION_JSON)
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
-                .setHeader("Authorization", "Bearer $it")
+                .setHeader("Authorization", "Bearer $token")
                 .build()
             return try {
-                logger.debug("Appending attributes $attributesPayload to entity $entityId")
+                logger.debug("Appending attributes $serializedPayload to entity $entityId")
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response status code: ${response.statusCode()}")
                 logger.debug("Http response body: ${response.body()}")

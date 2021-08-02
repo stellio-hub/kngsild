@@ -46,6 +46,17 @@ class NgsiLdUtilsTest {
     }
 
     @Test
+    fun `it should build an entity`() {
+        val entity =
+            NgsiLdEntityBuilder("urn:ngsi-ld:Entity:123".toUri()!!, "Entity")
+                .build()
+
+        assertEquals("urn:ngsi-ld:Entity:123", entity["id"].toString())
+        assertEquals("Entity", entity["type"])
+        assertEquals(NgsiLdUtils.coreContext, entity["@context"])
+    }
+
+    @Test
     fun `it should build a property`() {
         val property =
             NgsiLdPropertyBuilder("temperature")
@@ -56,11 +67,9 @@ class NgsiLdUtilsTest {
                 .withSubProperty("reliability", 0.98)
                 .build()
 
-        assertEquals(1, property.keys.size)
-        assertEquals("temperature", property.keys.first())
-        val propertyAttributes = property["temperature"]
-        (propertyAttributes as Map<*,*>?)?.apply {
-            assertEquals(6, this.keys.size)
-        } ?: fail("Property attributes should be a map")
+        assertEquals("temperature", property.propertyName)
+        assertEquals(6, property.propertyValue.size)
+        val value = property.propertyValue["value"]
+        assertEquals(31.0, value)
     }
 }
