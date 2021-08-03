@@ -98,6 +98,9 @@ object NgsiLdUtils {
     )
 }
 
+fun String.toDefaultDatasetId(): URI =
+    "urn:ngsi-ld:Dataset:$this".toUri()!!
+
 fun NgsildEntity.getRelationshipObject(relationshipName: String): URI? =
     ((this[relationshipName] as NgsiLdAttribute?)?.get("object") as String?)?.toUri()
 
@@ -107,16 +110,39 @@ fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI?): Boolean =
         is List<*> -> {
             (attributeEntry as NgsildMultiAttribute?)?.find {
                 if (datasetId != null)
-                    it["datasetId"] != null && it["datasetId"] == datasetId
+                    it["datasetId"] == datasetId
                 else
                     it["datasetId"] == null
             }?.isNotEmpty() ?: false
         }
         is Map<*,*> -> {
             if (datasetId != null)
-                attributeEntry["datasetId"] != null && attributeEntry["datasetId"] == datasetId
+                attributeEntry["datasetId"] == datasetId
             else
                 attributeEntry["datasetId"] == null
         }
         else -> false
+    }
+
+fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI?): NgsiLdAttribute? =
+    when (val attributeEntry = this[attributeName]) {
+        null -> null
+        is List<*> -> {
+            (attributeEntry as NgsildMultiAttribute?)?.find {
+                if (datasetId != null)
+                    it["datasetId"] == datasetId
+                else
+                    it["datasetId"] == null
+            }
+        }
+        is Map<*,*> -> {
+            val ngsiLdAttribute = attributeEntry as NgsiLdAttribute
+            if (datasetId != null && ngsiLdAttribute.get("datasetId") == datasetId)
+                ngsiLdAttribute
+            else if (datasetId == null && !ngsiLdAttribute.containsKey("datasetId"))
+                ngsiLdAttribute
+            else
+                null
+        }
+        else -> null
     }
