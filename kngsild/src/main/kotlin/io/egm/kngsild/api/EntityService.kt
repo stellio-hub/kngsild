@@ -180,6 +180,11 @@ class EntityService(
         attributes: List<NgsiLdAttributeNG>,
         contextUrl: String
     ): Either<ApplicationError, String> {
+        if (attributes.isEmpty()) {
+            logger.info("Empty attributes list received as input, returning")
+            return postSuccessCode.first().toString().right()
+        }
+
         return authUtils.getToken().flatMap { token ->
             val serializedPayload = attributes.serialize()
             val request = HttpRequest
