@@ -8,11 +8,19 @@ import java.time.ZonedDateTime
 typealias NgsildEntity = Map<String, Any>
 typealias NgsildMultiAttribute = List<Map<String, Any>>
 typealias NgsiLdAttribute = Map<String, Any>
+typealias NgsiLdTemporalAttributesInstances = Map<String, List<NgsiLdAttribute>>
 
 data class NgsiLdAttributeNG(
     val propertyName: String,
     val propertyValue: Map<String, Any>
 )
+
+fun List<NgsiLdAttributeNG>.groupByProperty(): NgsiLdTemporalAttributesInstances =
+    this.groupBy {
+        it.propertyName
+    }.mapValues { entry ->
+        entry.value.map { ngsiLdAttributeNG -> ngsiLdAttributeNG.propertyValue }
+    }
 
 fun List<NgsiLdAttributeNG>.serialize(): String =
     this.groupBy {
