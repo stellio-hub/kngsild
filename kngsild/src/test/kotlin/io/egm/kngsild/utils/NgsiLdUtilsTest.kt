@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.net.URI
 import java.time.ZonedDateTime
+import java.util.*
 
 class NgsiLdUtilsTest {
 

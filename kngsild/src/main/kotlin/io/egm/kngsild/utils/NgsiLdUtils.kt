@@ -106,7 +106,7 @@ object NgsiLdUtils {
     )
 }
 
-fun String.toDefaultDatasetId(): URI =
+fun <T> T.toDefaultDatasetId(): URI =
     "urn:ngsi-ld:Dataset:$this".toUri()!!
 
 fun NgsildEntity.getRelationshipObject(relationshipName: String): URI? =
