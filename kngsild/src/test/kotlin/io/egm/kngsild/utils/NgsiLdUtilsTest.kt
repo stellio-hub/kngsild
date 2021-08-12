@@ -114,7 +114,13 @@ class NgsiLdUtilsTest {
     }
 
     @Test
-    fun `it should create a default dataset id`() {
+    fun `it should create a default dataset id for a string`() {
         assertEquals(URI("urn:ngsi-ld:Dataset:01234"), "01234".toDefaultDatasetId())
+    }
+
+    @Test
+    fun `it should create a default dataset id for an UUID`() {
+        val uuid = UUID.randomUUID()
+        assertEquals(URI("urn:ngsi-ld:Dataset:$uuid"), uuid.toDefaultDatasetId())
     }
 }
