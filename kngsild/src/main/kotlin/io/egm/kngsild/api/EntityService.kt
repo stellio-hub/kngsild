@@ -15,6 +15,7 @@ import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
 import io.egm.kngsild.utils.HttpUtils.paramsUrlBuilder
 import io.egm.kngsild.utils.JsonUtils.deserializeObject
+import io.egm.kngsild.utils.JsonUtils.serializeObject
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -28,6 +29,8 @@ class EntityService(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val entityApiRootPath = "/ngsi-ld/v1/entities"
     private val patchSuccessCode = listOf(HttpURLConnection.HTTP_NO_CONTENT)
     private val postSuccessCode = listOf(HttpURLConnection.HTTP_NO_CONTENT)
 
@@ -36,7 +39,7 @@ class EntityService(
     ): Either<ApplicationError, ResourceLocation> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
-                URI.create("$contextBrokerUrl/ngsi-ld/v1/entities")
+                URI.create("$contextBrokerUrl$entityApiRootPath")
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
@@ -70,7 +73,7 @@ class EntityService(
             val request = HttpRequest
                 .newBuilder()
                 .uri(
-                    URI.create("$contextBrokerUrl/ngsi-ld/v1/entities$params")
+                    URI.create("$contextBrokerUrl$entityApiRootPath$params")
                 )
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
@@ -107,7 +110,7 @@ class EntityService(
             val request = HttpRequest
                 .newBuilder()
                 .uri(
-                    URI.create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId$params")
+                    URI.create("$contextBrokerUrl$entityApiRootPath/$entityId$params")
                 )
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
@@ -145,7 +148,7 @@ class EntityService(
                 .newBuilder()
                 .uri(
                     URI
-                        .create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
+                        .create("$contextBrokerUrl$entityApiRootPath/$entityId/attrs")
                 )
                 .method("PATCH", HttpRequest.BodyPublishers.ofString(attributesPayload))
                 .setHeader("Content-Type", APPLICATION_JSON)
@@ -183,7 +186,7 @@ class EntityService(
                 .newBuilder()
                 .uri(
                     URI
-                        .create("$contextBrokerUrl/ngsi-ld/v1/entities/$entityId/attrs")
+                        .create("$contextBrokerUrl$entityApiRootPath/$entityId/attrs")
                 )
                 .method("POST", HttpRequest.BodyPublishers.ofString(serializedPayload))
                 .setHeader("Content-Type", APPLICATION_JSON)
@@ -205,6 +208,42 @@ class EntityService(
             } catch (e: IOException) {
                 logger.warn(e.message ?: "Error encountered while processing POST request")
                 val errorMessage = e.message ?: "Error encountered while posting to context broker"
+                ContextBrokerError(errorMessage).left()
+            }
+        }
+    }
+
+    fun partialAttributeUpdate(
+        entityId: URI,
+        attributeName: String,
+        ngsiLdAttribute: NgsiLdAttribute,
+        contextUrl: String
+    ): Either<ApplicationError, String> {
+        return authUtils.getToken().flatMap {
+            val requestPayload = serializeObject(ngsiLdAttribute.minus("type"))
+            val request = HttpRequest
+                .newBuilder()
+                .uri(URI.create("$contextBrokerUrl$entityApiRootPath/$entityId/attrs/$attributeName"))
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(requestPayload))
+                .setHeader("Content-Type", APPLICATION_JSON)
+                .setHeader("Accept", APPLICATION_JSON)
+                .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
+                .setHeader("Authorization", "Bearer $it")
+                .build()
+            return try {
+                logger.debug("Patching attribute $attributeName of entity $entityId with payload $requestPayload")
+                val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                logger.debug("Http response status code: ${response.statusCode()}")
+                logger.debug("Http response body: ${response.body()}")
+                if (patchSuccessCode.contains(response.statusCode()))
+                    response.body().right()
+                else
+                    ContextBrokerError(
+                        "Received ${response.statusCode()} (${response.body()}) from context broker"
+                    ).left()
+            } catch (e: IOException) {
+                logger.warn(e.message ?: "Error encountered while processing PATCH request")
+                val errorMessage = e.message ?: "Error encountered while patching to context broker"
                 ContextBrokerError(errorMessage).left()
             }
         }

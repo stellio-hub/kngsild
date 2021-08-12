@@ -11,17 +11,20 @@ import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsiLdAttributeNG
+import io.egm.kngsild.utils.NgsiLdPropertyBuilder
 import io.egm.kngsild.utils.NgsiLdUtils.coreContext
 import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.UriUtils.toUri
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import java.io.File
 import java.net.URI
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EntityServiceTest {
@@ -411,11 +414,52 @@ class EntityServiceTest {
         )
     }
 
+    @Test
+    fun `it should partially update an entity attribute`() {
+        val now = ZonedDateTime.parse("2021-08-12T09:44:00.80868Z")
+        val partialPropery = NgsiLdPropertyBuilder("temperature")
+            .withValue(2.1)
+            .withObservedAt(now)
+            .build()
+
+        stubFor(
+            patch(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs/temperature"))
+                .willReturn(noContent())
+        )
+
+        val mockedAuthUtils = mock(AuthUtils::class.java)
+        `when`(
+            mockedAuthUtils.getToken()
+        ).thenReturn("token".right())
+        val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
+
+        val response = entityService.partialAttributeUpdate(
+            "urn:ngsi-ld:Building:01".toUri()!!,
+            "temperature",
+            partialPropery.propertyValue,
+            coreContext
+        )
+
+        assertTrue(response.isRight())
+
+        verify(
+            patchRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs/temperature"))
+            .withRequestBody(
+                equalToJson(
+                    """
+                    {
+                        "value": 2.1,
+                        "observedAt": "2021-08-12T09:44:00.80868Z" 
+                    }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
     private fun gimmeNgsildEntity(id: URI, type: String, attributes: Map<String, Any>): NgsildEntity =
         mapOf(
             "id" to id,
             "type" to type
         ).plus(attributes)
-
-    private fun <T> any(type: Class<T>): T = Mockito.any(type)
 }
