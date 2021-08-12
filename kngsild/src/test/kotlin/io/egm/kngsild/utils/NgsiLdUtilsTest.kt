@@ -21,7 +21,7 @@ class NgsiLdUtilsTest {
             "attribute2" to mapOf(
                 "type" to "Property",
                 "value" to 1.0,
-                "datasetId" to "urn:ngsi-ld:Dataset:123".toUri()
+                "datasetId" to "urn:ngsi-ld:Dataset:123"
             ),
             "multiAttribute" to listOf(
                 mapOf(
@@ -31,7 +31,7 @@ class NgsiLdUtilsTest {
                 mapOf(
                     "type" to "Property",
                     "value" to 1.0,
-                    "datasetId" to "urn:ngsi-ld:Dataset:123".toUri()
+                    "datasetId" to "urn:ngsi-ld:Dataset:123"
                 )
             )
         )

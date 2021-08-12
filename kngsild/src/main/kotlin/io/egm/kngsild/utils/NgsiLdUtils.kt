@@ -118,14 +118,14 @@ fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI?): Boolean =
         is List<*> -> {
             (attributeEntry as NgsildMultiAttribute?)?.find {
                 if (datasetId != null)
-                    it["datasetId"] == datasetId
+                    it["datasetId"] == datasetId.toString()
                 else
                     it["datasetId"] == null
             }?.isNotEmpty() ?: false
         }
         is Map<*,*> -> {
             if (datasetId != null)
-                attributeEntry["datasetId"] == datasetId
+                attributeEntry["datasetId"] == datasetId.toString()
             else
                 attributeEntry["datasetId"] == null
         }
