@@ -4,6 +4,7 @@ import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.UriUtils.toUri
 import java.net.URI
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 typealias NgsildEntity = Map<String, Any>
 typealias NgsildMultiAttribute = List<Map<String, Any>>
@@ -154,3 +155,8 @@ fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI?): NgsiLdAtt
         }
         else -> null
     }
+
+val formatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
+
+fun ZonedDateTime.toNgsiLdFormat(): String =
+    formatter.format(this)
