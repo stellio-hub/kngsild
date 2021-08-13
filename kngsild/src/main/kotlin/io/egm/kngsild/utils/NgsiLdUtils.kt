@@ -138,14 +138,14 @@ fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI?): NgsiLdAtt
         is List<*> -> {
             (attributeEntry as NgsildMultiAttribute?)?.find {
                 if (datasetId != null)
-                    it["datasetId"] == datasetId
+                    it["datasetId"] == datasetId.toString()
                 else
                     it["datasetId"] == null
             }
         }
         is Map<*,*> -> {
             val ngsiLdAttribute = attributeEntry as NgsiLdAttribute
-            if (datasetId != null && ngsiLdAttribute.get("datasetId") == datasetId)
+            if (datasetId != null && ngsiLdAttribute["datasetId"] == datasetId.toString())
                 ngsiLdAttribute
             else if (datasetId == null && !ngsiLdAttribute.containsKey("datasetId"))
                 ngsiLdAttribute
