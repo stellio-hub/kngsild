@@ -1,10 +1,10 @@
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.4.31"
+    id("org.jetbrains.kotlin.jvm") version "1.5.30"
     id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
     id("io.gitlab.arturbosch.detekt") version "1.16.0"
 
-    kotlin("kapt") version "1.4.31"
+    kotlin("kapt") version "1.5.30"
     `java-library`
     `maven-publish`
 }
@@ -13,17 +13,14 @@ repositories {
     // Use JCenter for resolving dependencies.
     jcenter()
     mavenCentral()
-    maven { url = uri("https://dl.bintray.com/arrow-kt/arrow-kt/") }
 }
 
-val arrowVersion = "0.11.0"
+val arrowVersion = "1.0.0"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("io.arrow-kt:arrow-core:$arrowVersion")
-    implementation("io.arrow-kt:arrow-syntax:$arrowVersion")
-    "kapt"("io.arrow-kt:arrow-meta:$arrowVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("ch.qos.logback:logback-classic:1.2.5")
 
