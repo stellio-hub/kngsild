@@ -68,11 +68,13 @@ class NgsiLdPropertyBuilder(
         return this
     }
 
-    fun withSubProperty(name: String, value: Any): NgsiLdPropertyBuilder {
-        attributeMap[name] = mapOf(
-            "type" to "Property",
-            "value" to value
-        )
+    fun withSubProperty(name: String, value: Any?): NgsiLdPropertyBuilder {
+        value?.apply {
+            attributeMap[name] = mapOf(
+                "type" to "Property",
+                "value" to value
+            )
+        }
         return this
     }
 
@@ -86,9 +88,17 @@ class NgsiLdEntityBuilder(
     val contexts: List<String> = emptyList()
 ) {
 
+    private var attributes = mutableMapOf<String, Any>()
+
+    fun addAttribute(ngsiLdAttributeNG: NgsiLdAttributeNG): NgsiLdEntityBuilder {
+        attributes[ngsiLdAttributeNG.propertyName] = ngsiLdAttributeNG.propertyValue
+        return this
+    }
+
     fun build(): NgsildEntity =
         mapOf("id" to id)
             .plus("type" to type)
+            .plus(attributes)
             .let {
                 if (contexts.isNotEmpty())
                     it.plus("@context" to contexts)
@@ -113,7 +123,7 @@ fun <T> T.toDefaultDatasetId(): URI =
 fun NgsildEntity.getRelationshipObject(relationshipName: String): URI? =
     ((this[relationshipName] as NgsiLdAttribute?)?.get("object") as String?)?.toUri()
 
-fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI?): Boolean =
+fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI? = null): Boolean =
     when (val attributeEntry = this[attributeName]) {
         null -> false
         is List<*> -> {
@@ -133,7 +143,7 @@ fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI?): Boolean =
         else -> false
     }
 
-fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI?): NgsiLdAttribute? =
+fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI? = null): NgsiLdAttribute? =
     when (val attributeEntry = this[attributeName]) {
         null -> null
         is List<*> -> {
