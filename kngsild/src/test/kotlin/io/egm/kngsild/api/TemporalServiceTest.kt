@@ -4,13 +4,11 @@ import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.egm.kngsild.utils.AuthUtils
-import io.egm.kngsild.utils.NgsiLdAttributeNG
-import io.egm.kngsild.utils.NgsiLdUtils
+import io.egm.kngsild.utils.*
 import io.egm.kngsild.utils.UriUtils.toUri
-import io.egm.kngsild.utils.groupByProperty
 import org.junit.jupiter.api.*
 import org.mockito.Mockito
+import java.net.URI
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TemporalServiceTest {
@@ -96,4 +94,33 @@ class TemporalServiceTest {
                 )
         )
     }
+
+    @Test
+    fun `it should retrieve temporal data of an entityId`() {
+        val entityId = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, emptyMap())
+        WireMock.stubFor(
+            WireMock.get(WireMock.urlMatching("/ngsi-ld/v1/temporal/entities/urn:ngsi-ld:Sensor:01"))
+                .willReturn(WireMock.ok().withBody(JsonUtils.serializeObject(entityId)))
+        )
+
+        val mockedAuthUtils = Mockito.mock(AuthUtils::class.java)
+        Mockito.`when`(
+            mockedAuthUtils.getToken()
+        ).thenReturn("token".right())
+        val temporalService = TemporalService("http://localhost:8089", mockedAuthUtils)
+
+        val response = temporalService.retrieve(
+            "urn:ngsi-ld:Sensor:01".toUri()!!,
+            emptyMap(),
+            NgsiLdUtils.coreContext
+        )
+
+        Assertions.assertTrue(response.isRight())
+        Assertions.assertTrue(response.exists { it["id"] == "urn:ngsi-ld:Sensor:01" })
+    }
+
+    private fun gimmeNgsildEntity(id: URI, attributes: Map<String, Any>): NgsildEntity =
+        mapOf(
+            "id" to id
+        ).plus(attributes)
 }
