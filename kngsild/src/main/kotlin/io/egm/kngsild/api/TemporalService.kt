@@ -6,6 +6,7 @@ import arrow.core.left
 import arrow.core.right
 import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
+import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.*
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import org.slf4j.LoggerFactory
@@ -52,6 +53,44 @@ class TemporalService(
             } catch (e: IOException) {
                 logger.warn(e.message ?: "Error encountered while processing POST request")
                 val errorMessage = e.message ?: "Error encountered while posting to context broker"
+                ContextBrokerError(errorMessage).left()
+            }
+        }
+    }
+
+    fun retrieve(
+        entityId: URI,
+        queryParams: Map<String, String>,
+        contextUrl: String
+    ): Either<ApplicationError, NgsildEntity> {
+        val params: String = HttpUtils.paramsUrlBuilder(queryParams)
+        return authUtils.getToken().flatMap {
+            val request = HttpRequest
+                .newBuilder()
+                .uri(
+                    URI.create("$contextBrokerUrl$temporalApiRootPath/$entityId$params")
+                )
+                .setHeader("Accept", HttpUtils.APPLICATION_JSONLD)
+                .setHeader("Link", HttpUtils.httpLinkHeaderBuilder(contextUrl))
+                .setHeader("Authorization", "Bearer $it")
+                .GET().build()
+
+            try {
+                logger.debug("Issuing retrieve: /ngsi-ld/v1/temporal/entities/$entityId$params")
+                val httpResponse = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+                logger.debug("Http response status code: ${httpResponse.statusCode()}")
+                logger.debug("Http response body: ${httpResponse.body()}")
+
+                if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK)
+                    JsonUtils.deserializeObject(httpResponse.body()).right()
+                else if (httpResponse.statusCode() == HttpURLConnection.HTTP_NOT_FOUND)
+                    ResourceNotFound("Entity not found").left()
+                else ContextBrokerError(
+                    "Failed to retrieve entity, " +
+                            "received ${httpResponse.statusCode()} (${httpResponse.body()}) from context broker"
+                ).left()
+            } catch (e: IOException) {
+                val errorMessage = e.message ?: "Error encountered while processing GET request"
                 ContextBrokerError(errorMessage).left()
             }
         }
