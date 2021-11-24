@@ -199,7 +199,7 @@ class EntityService(
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $token")
                 .build()
-            return try {
+            try {
                 logger.debug("Appending attributes $serializedPayload to entity $entityId")
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response status code: ${response.statusCode()}")

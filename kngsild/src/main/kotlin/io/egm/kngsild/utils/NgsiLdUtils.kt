@@ -134,7 +134,7 @@ fun NgsildEntity.hasAttribute(attributeName: String, datasetId: URI? = null): Bo
                     it["datasetId"] == null
             }?.isNotEmpty() ?: false
         }
-        is Map<*,*> -> {
+        is Map<*, *> -> {
             if (datasetId != null)
                 attributeEntry["datasetId"] == datasetId.toString()
             else
@@ -149,14 +149,14 @@ fun NgsildEntity.getAttribute(attributeName: String, datasetId: URI? = null): Ng
         is List<*> -> {
             (attributeEntry as NgsildMultiAttribute?)?.find {
                 if (datasetId != null)
-                    it["datasetId"] == datasetId.toString()
+                    it["datasetId"] == datasetId
                 else
                     it["datasetId"] == null
             }
         }
-        is Map<*,*> -> {
+        is Map<*, *> -> {
             val ngsiLdAttribute = attributeEntry as NgsiLdAttribute
-            if (datasetId != null && ngsiLdAttribute["datasetId"] == datasetId.toString())
+            if (datasetId != null && ngsiLdAttribute["datasetId"] == datasetId)
                 ngsiLdAttribute
             else if (datasetId == null && !ngsiLdAttribute.containsKey("datasetId"))
                 ngsiLdAttribute
