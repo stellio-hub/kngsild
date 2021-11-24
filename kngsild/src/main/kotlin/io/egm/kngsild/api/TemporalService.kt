@@ -87,7 +87,7 @@ class TemporalService(
                     ResourceNotFound("Entity not found").left()
                 else ContextBrokerError(
                     "Failed to retrieve entity, " +
-                            "received ${httpResponse.statusCode()} (${httpResponse.body()}) from context broker"
+                        "received ${httpResponse.statusCode()} (${httpResponse.body()}) from context broker"
                 ).left()
             } catch (e: IOException) {
                 val errorMessage = e.message ?: "Error encountered while processing GET request"

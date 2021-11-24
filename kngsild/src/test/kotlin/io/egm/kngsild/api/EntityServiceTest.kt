@@ -279,19 +279,20 @@ class EntityServiceTest {
 
         assertTrue(response.isRight())
 
-        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
-            .withRequestBody(
-                equalToJson(
-                    """
+        verify(
+            postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                         "volume": {
                             "type": "Property",
                             "value": 2.0
                         }
                     }
-                    """.trimIndent()
+                        """.trimIndent()
+                    )
                 )
-            )
         )
     }
 
@@ -334,10 +335,11 @@ class EntityServiceTest {
 
         assertTrue(response.isRight())
 
-        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
-            .withRequestBody(
-                equalToJson(
-                    """
+        verify(
+            postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                       "volume": [{
                         "type": "Property",
@@ -348,9 +350,9 @@ class EntityServiceTest {
                         "datasetId": "urn:ngsi-ld:Dataset:123"
                       }]
                     }
-                    """.trimIndent()
+                        """.trimIndent()
+                    )
                 )
-            )
         )
     }
 
@@ -392,10 +394,11 @@ class EntityServiceTest {
 
         assertTrue(response.isRight())
 
-        verify(postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
-            .withRequestBody(
-                equalToJson(
-                    """
+        verify(
+            postRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs"))
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                         "volume": {
                             "type": "Property",
@@ -406,9 +409,9 @@ class EntityServiceTest {
                             "value": 23.0
                         }                        
                     }
-                    """.trimIndent()
+                        """.trimIndent()
+                    )
                 )
-            )
         )
     }
 
@@ -442,16 +445,16 @@ class EntityServiceTest {
 
         verify(
             patchRequestedFor(urlEqualTo("/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01/attrs/temperature"))
-            .withRequestBody(
-                equalToJson(
-                    """
+                .withRequestBody(
+                    equalToJson(
+                        """
                     {
                         "value": 2.1,
                         "observedAt": "2021-08-12T09:44:00.80868Z" 
                     }
-                    """.trimIndent()
+                        """.trimIndent()
+                    )
                 )
-            )
         )
     }
 

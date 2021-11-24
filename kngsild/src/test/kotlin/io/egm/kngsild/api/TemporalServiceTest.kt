@@ -74,7 +74,9 @@ class TemporalServiceTest {
         Assertions.assertTrue(response.isRight())
 
         WireMock.verify(
-            WireMock.postRequestedFor(WireMock.urlEqualTo("/ngsi-ld/v1/temporal/entities/urn:ngsi-ld:Building:01/attrs"))
+            WireMock.postRequestedFor(
+                WireMock.urlEqualTo("/ngsi-ld/v1/temporal/entities/urn:ngsi-ld:Building:01/attrs")
+            )
                 .withRequestBody(
                     WireMock.equalToJson(
                         """
