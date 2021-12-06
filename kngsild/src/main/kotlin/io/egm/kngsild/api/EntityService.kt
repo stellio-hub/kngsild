@@ -38,6 +38,7 @@ class EntityService(
         entityPayload: String
     ): Either<ApplicationError, ResourceLocation> {
         return authUtils.getToken().flatMap {
+            logger.debug("Creating entity $entityPayload")
             val request = HttpRequest.newBuilder().uri(
                 URI.create("$contextBrokerUrl$entityApiRootPath")
             )
@@ -84,7 +85,7 @@ class EntityService(
                 logger.debug("Issuing query: /ngsi-ld/v1/entities$params")
                 val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response status code: ${httpResponse.statusCode()}")
-                logger.debug("Http response body: ${httpResponse.body()}")
+                logger.trace("Http response body: ${httpResponse.body()}")
 
                 val response: List<Any> = JsonUtils.mapper.readValue(
                     httpResponse.body(),
@@ -159,8 +160,7 @@ class EntityService(
             return try {
                 logger.debug("Patching entity $entityId with payload $attributesPayload")
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                logger.debug("Http response status code: ${response.statusCode()}")
-                logger.debug("Http response body: ${response.body()}")
+                logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
                 if (patchSuccessCode.contains(response.statusCode()))
                     response.body().right()
                 else
@@ -202,8 +202,7 @@ class EntityService(
             try {
                 logger.debug("Appending attributes $serializedPayload to entity $entityId")
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                logger.debug("Http response status code: ${response.statusCode()}")
-                logger.debug("Http response body: ${response.body()}")
+                logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
                 if (postSuccessCode.contains(response.statusCode()))
                     response.body().right()
                 else
@@ -238,8 +237,7 @@ class EntityService(
             return try {
                 logger.debug("Patching attribute $attributeName of entity $entityId with payload $requestPayload")
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                logger.debug("Http response status code: ${response.statusCode()}")
-                logger.debug("Http response body: ${response.body()}")
+                logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
                 if (patchSuccessCode.contains(response.statusCode()))
                     response.body().right()
                 else

@@ -40,10 +40,10 @@ class TemporalService(
                 .setHeader("Authorization", "Bearer $token")
                 .build()
             return try {
-                logger.debug("Appending attributes $serializedPayload to entity $entityId")
+                logger.debug("Issuing append attributes: $contextBrokerUrl$temporalApiRootPath/$entityId/attrs")
+                logger.trace("Appending attributes $serializedPayload to entity $entityId")
                 val response = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-                logger.debug("Http response status code: ${response.statusCode()}")
-                logger.debug("Http response body: ${response.body()}")
+                logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
                 if (HttpURLConnection.HTTP_NO_CONTENT == response.statusCode())
                     response.body().right()
                 else
@@ -76,10 +76,10 @@ class TemporalService(
                 .GET().build()
 
             try {
-                logger.debug("Issuing retrieve: /ngsi-ld/v1/temporal/entities/$entityId$params")
+                logger.debug("Issuing retrieve: $contextBrokerUrl$temporalApiRootPath/$entityId$params")
                 val httpResponse = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response status code: ${httpResponse.statusCode()}")
-                logger.debug("Http response body: ${httpResponse.body()}")
+                logger.trace("Http response body: ${httpResponse.body()}")
 
                 if (httpResponse.statusCode() == HttpURLConnection.HTTP_OK)
                     JsonUtils.deserializeObject(httpResponse.body()).right()
