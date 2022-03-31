@@ -18,12 +18,18 @@ class AuthUtils(
     private val serverUrl: String,
     private val clientId: String,
     private val clientSecret: String,
-    private val grantType: String
+    private val grantType: String,
+    private val enabled: Boolean = true
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getToken(): Either<ApplicationError, String> {
+        if (!enabled) {
+            logger.debug("Authentication is not enabled, returning random string")
+            return "Unused-Thing".right()
+        }
+
         val request = HttpRequest
             .newBuilder()
             .uri(URI.create(serverUrl))
