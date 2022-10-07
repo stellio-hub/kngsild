@@ -5,9 +5,7 @@ import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import io.egm.kngsild.model.AccessTokenNotRetrieved
-import io.egm.kngsild.model.AlreadyExists
-import io.egm.kngsild.model.ResourceNotFound
+import io.egm.kngsild.model.*
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsiLdAttributeNG
@@ -68,27 +66,6 @@ class EntityServiceTest {
             mockedAuthUtils.getToken()
         ).thenReturn("token".right())
         val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
-
-        val response = entityService.create(entityPayload)
-
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it == "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01" })
-    }
-
-    @Test
-    fun `it should create an entity with inherit token`() {
-        val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
-
-        stubFor(
-            post(urlMatching("/ngsi-ld/v1/entities"))
-                .willReturn(
-                    created()
-                        .withHeader("Location", "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01")
-                )
-        )
-
-        val authUtils = AuthUtils("token")
-        val entityService = EntityService("http://localhost:8089", authUtils)
 
         val response = entityService.create(entityPayload)
 
@@ -174,7 +151,7 @@ class EntityServiceTest {
 
     @Test
     fun `it should retrieve an entity`() {
-        val entity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", emptyMap())
+        val entity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", mapOf("test" to "test"))
         stubFor(
             get(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Sensor:01"))
                 .willReturn(ok().withBody(serializeObject(entity)))

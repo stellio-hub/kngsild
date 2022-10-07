@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.reset
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import io.egm.kngsild.model.AccessTokenNotRetrieved
+import io.egm.kngsild.model.*
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -44,19 +44,36 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return an access token`() {
+    fun `it should return an access token with ClientCredentials`() {
         stubFor(
             post(urlMatching("/auth"))
                 .willReturn(
                     ok().withBody(serializeObject(mapOf("access_token" to "token")))
                 )
         )
-
-        val response = AuthUtils(
+        val clientCredentials = ClientCredentials(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",
             "client_credentials"
+        )
+
+        val response = AuthUtils(
+            clientCredentials = clientCredentials,
+            authType = AuthType.CLIENT_CREDENTIALS
+        ).getToken()
+
+        assertTrue(response.isRight())
+        assertEquals(response, "token".right())
+    }
+
+    @Test
+    fun `it should return an access token with ProvidedToken`() {
+        val providedToken = ProvidedToken("token")
+
+        val response = AuthUtils(
+            providedToken = providedToken,
+            authType = AuthType.PROVIDED_TOKEN
         ).getToken()
 
         assertTrue(response.isRight())
@@ -69,15 +86,39 @@ class AuthUtilsTest {
             post(urlMatching("/auth"))
                 .willReturn(ok().withBody(serializeObject(emptyMap<String, Any>())))
         )
-
-        val response = AuthUtils(
+        val clientCredentials = ClientCredentials(
             "http://localhost:8089/auth",
             "client_id",
             "client_secret",
             "client_credentials"
+        )
+
+        val response = AuthUtils(
+            clientCredentials = clientCredentials,
+            authType = AuthType.CLIENT_CREDENTIALS
         ).getToken()
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
+    }
+
+    @Test
+    fun `it should return a left AuthenticationServerError if no ProvidedToken are set`() {
+        val response = AuthUtils(
+            authType = AuthType.PROVIDED_TOKEN
+        ).getToken()
+
+        assertTrue(response.isLeft())
+        assertEquals(response, AuthenticationServerError("ProvidedToken are not set").left())
+    }
+
+    @Test
+    fun `it should return a left AuthenticationServerError if no ClientCredentials are set`() {
+        val response = AuthUtils(
+            authType = AuthType.CLIENT_CREDENTIALS
+        ).getToken()
+
+        assertTrue(response.isLeft())
+        assertEquals(response, AuthenticationServerError("ClientCredentials are not set").left())
     }
 }
