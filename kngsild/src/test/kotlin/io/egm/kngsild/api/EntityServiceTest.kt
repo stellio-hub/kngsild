@@ -76,6 +76,27 @@ class EntityServiceTest {
     }
 
     @Test
+    fun `it should create an entity with inherit token`() {
+        val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
+
+        stubFor(
+            post(urlMatching("/ngsi-ld/v1/entities"))
+                .willReturn(
+                    created()
+                        .withHeader("Location", "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01")
+                )
+        )
+
+        val authUtils = AuthUtils("token")
+        val entityService = EntityService("http://localhost:8089", authUtils)
+
+        val response = entityService.create(entityPayload)
+
+        assertTrue(response.isRight())
+        assertTrue(response.exists { it == "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01" })
+    }
+
+    @Test
     fun `it should return a left AlreadyExists if the entity already exists`() {
         val entityPayload = File(entityPayloadFile!!.file).inputStream().readBytes().toString(Charsets.UTF_8)
 
