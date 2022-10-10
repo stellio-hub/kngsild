@@ -18,6 +18,16 @@ class AuthUtils(
     private val authType: AuthType = AuthType.NONE
 ) {
 
+    init {
+        when (authType) {
+            AuthType.PROVIDED_TOKEN ->
+                if (providedToken == null) throw ConfigurationError("ProvidedToken are not set")
+            AuthType.CLIENT_CREDENTIALS ->
+                if (clientCredentials == null) throw ConfigurationError("ClientCredentials are not set")
+                else this
+        }
+    }
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun getToken(): Either<ApplicationError, String> {
@@ -26,45 +36,40 @@ class AuthUtils(
                 logger.debug("Authentication is not enabled, returning random string")
                 return "Unused-Thing".right()
             }
-            AuthType.PROVIDED_TOKEN -> {
-                return providedToken?.accessToken?.right()
-                    ?: AuthenticationServerError("ProvidedToken are not set").left()
-            }
+            AuthType.PROVIDED_TOKEN -> return providedToken!!.accessToken.right()
+
             AuthType.CLIENT_CREDENTIALS -> {
-                if (clientCredentials == null) return AuthenticationServerError("ClientCredentials are not set").left()
-                else {
-                    val request = HttpRequest
-                        .newBuilder()
-                        .uri(URI.create(clientCredentials.serverUrl))
-                        .POST(
-                            buildFormDataFromMap(
-                                mapOf(
-                                    "client_id" to clientCredentials.clientId,
-                                    "client_secret" to clientCredentials.clientSecret,
-                                    "grant_type" to clientCredentials.grantType
-                                )
+                val request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create(clientCredentials!!.serverUrl))
+                    .POST(
+                        buildFormDataFromMap(
+                            mapOf(
+                                "client_id" to clientCredentials.clientId,
+                                "client_secret" to clientCredentials.clientSecret,
+                                "grant_type" to clientCredentials.grantType
                             )
                         )
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .build()
+                    )
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .build()
 
-                    return try {
-                        val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body()
-                        val response: Map<String, String> = JsonUtils.mapper.readValue(
-                            httpResponse,
-                            JsonUtils.mapper.typeFactory.constructMapLikeType(
-                                Map::class.java, String::class.java, String::class.java
-                            )
+                return try {
+                    val httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body()
+                    val response: Map<String, String> = JsonUtils.mapper.readValue(
+                        httpResponse,
+                        JsonUtils.mapper.typeFactory.constructMapLikeType(
+                            Map::class.java, String::class.java, String::class.java
                         )
-                        val accessToken = response["access_token"]
+                    )
+                    val accessToken = response["access_token"]
 
-                        accessToken?.right() ?: AccessTokenNotRetrieved("Unable to get an access token").left()
-                    } catch (e: IOException) {
-                        val errorMessage =
-                            e.message ?: "Error encountered while requesting token from authentication server"
-                        logger.warn(errorMessage)
-                        AuthenticationServerError(errorMessage).left()
-                    }
+                    accessToken?.right() ?: AccessTokenNotRetrieved("Unable to get an access token").left()
+                } catch (e: IOException) {
+                    val errorMessage =
+                        e.message ?: "Error encountered while requesting token from authentication server"
+                    logger.warn(errorMessage)
+                    AuthenticationServerError(errorMessage).left()
                 }
             }
         }

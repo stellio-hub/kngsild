@@ -12,13 +12,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.*
 import io.egm.kngsild.utils.JsonUtils.serializeObject
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthUtilsTest {
@@ -104,21 +100,19 @@ class AuthUtilsTest {
 
     @Test
     fun `it should return a left AuthenticationServerError if no ProvidedToken are set`() {
-        val response = AuthUtils(
-            authType = AuthType.PROVIDED_TOKEN
-        ).getToken()
-
-        assertTrue(response.isLeft())
-        assertEquals(response, AuthenticationServerError("ProvidedToken are not set").left())
+        assertThrows<ConfigurationError>(message = "ProvidedToken are not set") {
+            AuthUtils(
+                authType = AuthType.PROVIDED_TOKEN
+            )
+        }
     }
 
     @Test
     fun `it should return a left AuthenticationServerError if no ClientCredentials are set`() {
-        val response = AuthUtils(
-            authType = AuthType.CLIENT_CREDENTIALS
-        ).getToken()
-
-        assertTrue(response.isLeft())
-        assertEquals(response, AuthenticationServerError("ClientCredentials are not set").left())
+        assertThrows<ConfigurationError>(message = "ProvidedToken are not set") {
+            AuthUtils(
+                authType = AuthType.CLIENT_CREDENTIALS
+            )
+        }
     }
 }
