@@ -40,7 +40,7 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return an access token with ClientCredentials`() {
+    fun `it should return an access token when client credentials mode is configured`() {
         stubFor(
             post(urlMatching("/auth"))
                 .willReturn(
@@ -50,8 +50,7 @@ class AuthUtilsTest {
         val clientCredentials = ClientCredentials(
             "http://localhost:8089/auth",
             "client_id",
-            "client_secret",
-            "client_credentials"
+            "client_secret"
         )
 
         val response = AuthUtils(
@@ -64,7 +63,7 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return an access token with ProvidedToken`() {
+    fun `it should return an access token when ProvidedToken mode is configured`() {
         val providedToken = ProvidedToken("token")
 
         val response = AuthUtils(
@@ -85,8 +84,7 @@ class AuthUtilsTest {
         val clientCredentials = ClientCredentials(
             "http://localhost:8089/auth",
             "client_id",
-            "client_secret",
-            "client_credentials"
+            "client_secret"
         )
 
         val response = AuthUtils(
@@ -100,7 +98,9 @@ class AuthUtilsTest {
 
     @Test
     fun `it should return a left AuthenticationServerError if no ProvidedToken are set`() {
-        assertThrows<ConfigurationError>(message = "ProvidedToken are not set") {
+        assertThrows<ConfigurationError>(
+            "You have chosen a ProvidedToken type authentification but no configuration of this type has been made"
+        ) {
             AuthUtils(
                 authType = AuthType.PROVIDED_TOKEN
             )
@@ -109,7 +109,9 @@ class AuthUtilsTest {
 
     @Test
     fun `it should return a left AuthenticationServerError if no ClientCredentials are set`() {
-        assertThrows<ConfigurationError>(message = "ProvidedToken are not set") {
+        assertThrows<ConfigurationError>(
+            "You have chosen a ClientCredentials type authentification but no configuration of this type has been made"
+        ) {
             AuthUtils(
                 authType = AuthType.CLIENT_CREDENTIALS
             )

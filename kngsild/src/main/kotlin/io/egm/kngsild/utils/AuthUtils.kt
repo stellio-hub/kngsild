@@ -21,14 +21,18 @@ class AuthUtils(
     init {
         when (authType) {
             AuthType.PROVIDED_TOKEN ->
-                if (providedToken == null) throw ConfigurationError("ProvidedToken are not set")
+                if (providedToken == null)
+                    throw ConfigurationError(configurationErrorMessage("ProvidedToken"))
             AuthType.CLIENT_CREDENTIALS ->
-                if (clientCredentials == null) throw ConfigurationError("ClientCredentials are not set")
-                else this
+                if (clientCredentials == null)
+                    throw ConfigurationError(configurationErrorMessage("ClientCredentials"))
         }
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private fun configurationErrorMessage(errorMessage: String): String =
+        "You have chosen a $errorMessage type authentification but no configuration of this type has been made"
 
     fun getToken(): Either<ApplicationError, String> {
         when (authType) {
@@ -75,3 +79,19 @@ class AuthUtils(
         }
     }
 }
+
+enum class AuthType {
+    NONE,
+    PROVIDED_TOKEN,
+    CLIENT_CREDENTIALS,
+}
+
+data class ClientCredentials(
+    val serverUrl: String,
+    val clientId: String,
+    val clientSecret: String
+) {
+    val grantType = "client_credentials"
+}
+
+data class ProvidedToken(val accessToken: String)
