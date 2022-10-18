@@ -12,21 +12,18 @@ import java.net.URI
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class AuthUtils(
-    private val clientCredentials: ClientCredentials? = null,
-    private val providedToken: ProvidedToken? = null,
-    private val authType: AuthType = AuthType.NONE
-) {
+class AuthUtils {
+    private var authType: AuthType = AuthType.NONE
+    private var providedToken: ProvidedToken? = null
+    private var clientCredentials: ClientCredentials? = null
+    constructor(providedToken: ProvidedToken){
+        this.providedToken = providedToken
+        this.authType = AuthType.PROVIDED_TOKEN
+    }
 
-    init {
-        when (authType) {
-            AuthType.PROVIDED_TOKEN ->
-                if (providedToken == null)
-                    throw IllegalArgumentException("You have chosen a ProvideToken type authentication but providedToken is missing")
-            AuthType.CLIENT_CREDENTIALS ->
-                if (clientCredentials == null)
-                    throw IllegalArgumentException("You have chosen a ClientCredentials type authentication but clientCredentials is missing")
-        }
+    constructor(clientCredentials: ClientCredentials){
+        this.clientCredentials = clientCredentials
+        this.authType = AuthType.CLIENT_CREDENTIALS
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -46,9 +43,9 @@ class AuthUtils(
                     .POST(
                         buildFormDataFromMap(
                             mapOf(
-                                "client_id" to clientCredentials.clientId,
-                                "client_secret" to clientCredentials.clientSecret,
-                                "grant_type" to clientCredentials.grantType
+                                "client_id" to clientCredentials!!.clientId,
+                                "client_secret" to clientCredentials!!.clientSecret,
+                                "grant_type" to clientCredentials!!.grantType
                             )
                         )
                     )

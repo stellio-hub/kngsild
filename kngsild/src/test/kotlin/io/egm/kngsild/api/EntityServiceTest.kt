@@ -5,7 +5,9 @@ import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import io.egm.kngsild.model.*
+import io.egm.kngsild.model.AccessTokenNotRetrieved
+import io.egm.kngsild.model.AlreadyExists
+import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsiLdAttributeNG
@@ -151,7 +153,7 @@ class EntityServiceTest {
 
     @Test
     fun `it should retrieve an entity`() {
-        val entity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", mapOf("test" to "test"))
+        val entity = gimmeNgsildEntity("urn:ngsi-ld:Sensor:01".toUri()!!, "Sensor", emptyMap())
         stubFor(
             get(urlMatching("/ngsi-ld/v1/entities/urn:ngsi-ld:Sensor:01"))
                 .willReturn(ok().withBody(serializeObject(entity)))

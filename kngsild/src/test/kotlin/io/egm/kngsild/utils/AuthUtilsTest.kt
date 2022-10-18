@@ -54,8 +54,7 @@ class AuthUtilsTest {
         )
 
         val response = AuthUtils(
-            clientCredentials = clientCredentials,
-            authType = AuthType.CLIENT_CREDENTIALS
+            clientCredentials = clientCredentials
         ).getToken()
 
         assertTrue(response.isRight())
@@ -67,8 +66,7 @@ class AuthUtilsTest {
         val providedToken = ProvidedToken("token")
 
         val response = AuthUtils(
-            providedToken = providedToken,
-            authType = AuthType.PROVIDED_TOKEN
+            providedToken = providedToken
         ).getToken()
 
         assertTrue(response.isRight())
@@ -88,33 +86,10 @@ class AuthUtilsTest {
         )
 
         val response = AuthUtils(
-            clientCredentials = clientCredentials,
-            authType = AuthType.CLIENT_CREDENTIALS
+            clientCredentials = clientCredentials
         ).getToken()
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
-    }
-
-    @Test
-    fun `it should return a left IllegalArgumentException if no ProvidedToken are set when required`() {
-        assertThrows<IllegalArgumentException>(
-            "You have chosen a ProvideToken type authentication but providedToken is missing"
-        ) {
-            AuthUtils(
-                authType = AuthType.PROVIDED_TOKEN
-            )
-        }
-    }
-
-    @Test
-    fun `it should return a left IllegalArgumentException if no ClientCredentials are set when required`() {
-        assertThrows<IllegalArgumentException>(
-            "You have chosen a ClientCredentials type authentication but clientCredentials is missing"
-        ) {
-            AuthUtils(
-                authType = AuthType.CLIENT_CREDENTIALS
-            )
-        }
     }
 }

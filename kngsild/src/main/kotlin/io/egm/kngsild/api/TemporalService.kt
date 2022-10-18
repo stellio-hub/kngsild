@@ -41,7 +41,7 @@ class TemporalService(
                 .build()
             return try {
                 logger.debug("Appending ${ngsiLdTemporalAttributesInstances.size} attributes: " +
-                        "$contextBrokerUrl$temporalApiRootPath/$entityId/attrs")
+                    "$contextBrokerUrl$temporalApiRootPath/$entityId/attrs")
                 logger.trace("Appending attributes $serializedPayload to entity $entityId")
                 val response = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
