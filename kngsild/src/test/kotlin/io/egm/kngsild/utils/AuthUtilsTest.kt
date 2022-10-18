@@ -98,7 +98,7 @@ class AuthUtilsTest {
 
     @Test
     fun `it should return a left AuthenticationServerError if no ProvidedToken are set`() {
-        assertThrows<ConfigurationError>(
+        assertThrows<IllegalArgumentException>(
             "You have chosen a ProvidedToken type authentification but no configuration of this type has been made"
         ) {
             AuthUtils(
@@ -109,7 +109,7 @@ class AuthUtilsTest {
 
     @Test
     fun `it should return a left AuthenticationServerError if no ClientCredentials are set`() {
-        assertThrows<ConfigurationError>(
+        assertThrows<IllegalArgumentException>(
             "You have chosen a ClientCredentials type authentification but no configuration of this type has been made"
         ) {
             AuthUtils(

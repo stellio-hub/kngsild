@@ -22,17 +22,14 @@ class AuthUtils(
         when (authType) {
             AuthType.PROVIDED_TOKEN ->
                 if (providedToken == null)
-                    throw ConfigurationError(configurationErrorMessage("ProvidedToken"))
+                    throw IllegalArgumentException("You have chosen a ProvidedToken type authentification but no configuration of this type has been made")
             AuthType.CLIENT_CREDENTIALS ->
                 if (clientCredentials == null)
-                    throw ConfigurationError(configurationErrorMessage("ClientCredentials"))
+                    throw IllegalArgumentException("You have chosen a ClientCredentials type authentification but no configuration of this type has been made")
         }
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    private fun configurationErrorMessage(errorMessage: String): String =
-        "You have chosen a $errorMessage type authentification but no configuration of this type has been made"
 
     fun getToken(): Either<ApplicationError, String> {
         when (authType) {
