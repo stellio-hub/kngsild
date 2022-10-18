@@ -22,10 +22,10 @@ class AuthUtils(
         when (authType) {
             AuthType.PROVIDED_TOKEN ->
                 if (providedToken == null)
-                    throw IllegalArgumentException("You have chosen a ProvidedToken type authentification but no configuration of this type has been made")
+                    throw IllegalArgumentException("You have chosen a ProvideToken type authentication but providedToken is missing")
             AuthType.CLIENT_CREDENTIALS ->
                 if (clientCredentials == null)
-                    throw IllegalArgumentException("You have chosen a ClientCredentials type authentification but no configuration of this type has been made")
+                    throw IllegalArgumentException("You have chosen a ClientCredentials type authentication but clientCredentials is missing")
         }
     }
 

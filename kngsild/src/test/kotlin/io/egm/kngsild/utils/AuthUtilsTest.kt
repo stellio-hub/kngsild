@@ -97,9 +97,9 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return a left AuthenticationServerError if no ProvidedToken are set`() {
+    fun `it should return a left IllegalArgumentException if no ProvidedToken are set when required`() {
         assertThrows<IllegalArgumentException>(
-            "You have chosen a ProvidedToken type authentification but no configuration of this type has been made"
+            "You have chosen a ProvideToken type authentication but providedToken is missing"
         ) {
             AuthUtils(
                 authType = AuthType.PROVIDED_TOKEN
@@ -108,9 +108,9 @@ class AuthUtilsTest {
     }
 
     @Test
-    fun `it should return a left AuthenticationServerError if no ClientCredentials are set`() {
+    fun `it should return a left IllegalArgumentException if no ClientCredentials are set when required`() {
         assertThrows<IllegalArgumentException>(
-            "You have chosen a ClientCredentials type authentification but no configuration of this type has been made"
+            "You have chosen a ClientCredentials type authentication but clientCredentials is missing"
         ) {
             AuthUtils(
                 authType = AuthType.CLIENT_CREDENTIALS
