@@ -16,7 +16,7 @@ repositories {
 }
 
 val arrowVersion = "1.0.0"
-val jacksonVersion = "2.13.+"
+val jacksonVersion = "2.13.5"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -30,7 +30,7 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.3.4"
+version = "0.3.5"
 group = "io.egm"
 
 publishing {
