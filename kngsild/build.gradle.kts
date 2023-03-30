@@ -16,20 +16,21 @@ repositories {
 }
 
 val arrowVersion = "1.0.0"
+val jacksonVersion = "2.13.+"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.+")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("ch.qos.logback:logback-classic:1.2.5")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("ch.qos.logback:logback-classic:1.2.9")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.4.0-dev"
+version = "0.3.4"
 group = "io.egm"
 
 publishing {
