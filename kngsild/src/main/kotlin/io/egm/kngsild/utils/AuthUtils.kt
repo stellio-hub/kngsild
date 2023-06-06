@@ -16,12 +16,12 @@ class AuthUtils {
     private var authType: AuthType = AuthType.NONE
     private var providedToken: ProvidedToken? = null
     private var clientCredentials: ClientCredentials? = null
-    constructor(providedToken: ProvidedToken){
+    constructor(providedToken: ProvidedToken) {
         this.providedToken = providedToken
         this.authType = AuthType.PROVIDED_TOKEN
     }
 
-    constructor(clientCredentials: ClientCredentials){
+    constructor(clientCredentials: ClientCredentials) {
         this.clientCredentials = clientCredentials
         this.authType = AuthType.CLIENT_CREDENTIALS
     }
