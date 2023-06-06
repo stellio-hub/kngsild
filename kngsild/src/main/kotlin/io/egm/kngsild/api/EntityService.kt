@@ -12,6 +12,7 @@ import io.egm.kngsild.utils.*
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
 import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
 import io.egm.kngsild.utils.HttpUtils.paramsUrlBuilder
@@ -46,7 +47,7 @@ class EntityService(
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .POST(HttpRequest.BodyPublishers.ofString(entityPayload)).build()
             try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
@@ -83,7 +84,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .GET().build()
 
             try {
@@ -122,7 +123,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .GET().build()
 
             try {
@@ -164,7 +165,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .build()
             return try {
                 logger.debug("Patching entity $entityId with payload $attributesPayload")
@@ -208,7 +209,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $token")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .build()
             try {
                 logger.debug("Appending attributes $serializedPayload to entity $entityId")
@@ -245,7 +246,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader("NGSILD-Tenant", tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .build()
             return try {
                 logger.debug("Patching attribute $attributeName of entity $entityId with payload $requestPayload")
