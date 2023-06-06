@@ -30,7 +30,7 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:3.8.0")
 }
 
-version = "0.3.5"
+version = "0.3.6"
 group = "io.egm"
 
 publishing {
