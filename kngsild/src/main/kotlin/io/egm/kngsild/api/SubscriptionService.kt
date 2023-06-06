@@ -9,6 +9,8 @@ import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
+import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -22,7 +24,8 @@ class SubscriptionService(
 ) {
 
     fun create(
-        subscriptionPayload: String
+        subscriptionPayload: String,
+        tenantUri: URI? = DEFAULT_TENANT_URI
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
@@ -30,6 +33,7 @@ class SubscriptionService(
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .POST(HttpRequest.BodyPublishers.ofString(subscriptionPayload)).build()
             try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
