@@ -8,6 +8,8 @@ import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.*
+import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -26,7 +28,8 @@ class TemporalService(
     fun addAttributes(
         entityId: URI,
         ngsiLdTemporalAttributesInstances: NgsiLdTemporalAttributesInstances,
-        contextUrl: String
+        contextUrl: String,
+        tenantUri: URI? = DEFAULT_TENANT_URI
     ): Either<ApplicationError, String> {
         return authUtils.getToken().flatMap { token ->
             val serializedPayload = serializeObject(ngsiLdTemporalAttributesInstances)
@@ -38,10 +41,13 @@ class TemporalService(
                 .setHeader("Accept", HttpUtils.APPLICATION_JSON)
                 .setHeader("Link", HttpUtils.httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $token")
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .build()
             return try {
-                logger.debug("Appending ${ngsiLdTemporalAttributesInstances.size} attributes: " +
-                    "$contextBrokerUrl$temporalApiRootPath/$entityId/attrs")
+                logger.debug(
+                    "Appending ${ngsiLdTemporalAttributesInstances.size} attributes: " +
+                        "$contextBrokerUrl$temporalApiRootPath/$entityId/attrs"
+                )
                 logger.trace("Appending attributes $serializedPayload to entity $entityId")
                 val response = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
@@ -62,7 +68,8 @@ class TemporalService(
     fun retrieve(
         entityId: URI,
         queryParams: Map<String, String>,
-        contextUrl: String
+        contextUrl: String,
+        tenantUri: URI? = DEFAULT_TENANT_URI
     ): Either<ApplicationError, NgsildEntity> {
         val params: String = HttpUtils.paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
@@ -74,6 +81,7 @@ class TemporalService(
                 .setHeader("Accept", HttpUtils.APPLICATION_JSONLD)
                 .setHeader("Link", HttpUtils.httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
+                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
                 .GET().build()
 
             try {
