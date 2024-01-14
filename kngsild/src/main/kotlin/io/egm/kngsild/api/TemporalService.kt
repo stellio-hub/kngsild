@@ -8,7 +8,7 @@ import io.egm.kngsild.model.ApplicationError
 import io.egm.kngsild.model.ContextBrokerError
 import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.*
-import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_NAME
 import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import org.slf4j.LoggerFactory
@@ -29,7 +29,7 @@ class TemporalService(
         entityId: URI,
         ngsiLdTemporalAttributesInstances: NgsiLdTemporalAttributesInstances,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, String> {
         return authUtils.getToken().flatMap { token ->
             val serializedPayload = serializeObject(ngsiLdTemporalAttributesInstances)
@@ -41,7 +41,7 @@ class TemporalService(
                 .setHeader("Accept", HttpUtils.APPLICATION_JSON)
                 .setHeader("Link", HttpUtils.httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $token")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .build()
             return try {
                 logger.debug(
@@ -69,7 +69,7 @@ class TemporalService(
         entityId: URI,
         queryParams: Map<String, String>,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, NgsildEntity> {
         val params: String = HttpUtils.paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
@@ -81,7 +81,7 @@ class TemporalService(
                 .setHeader("Accept", HttpUtils.APPLICATION_JSONLD)
                 .setHeader("Link", HttpUtils.httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .GET().build()
 
             try {

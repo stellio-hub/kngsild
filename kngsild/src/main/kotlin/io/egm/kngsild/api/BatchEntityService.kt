@@ -10,7 +10,7 @@ import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.HttpUtils
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
-import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_NAME
 import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import org.slf4j.LoggerFactory
@@ -42,7 +42,7 @@ class BatchEntityService(
 
     fun create(
         payload: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
@@ -50,7 +50,7 @@ class BatchEntityService(
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
 
             try {
@@ -73,7 +73,7 @@ class BatchEntityService(
     fun upsert(
         payload: String,
         queryParams: Map<String, String>,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, HttpResponse<String>> {
         val params: String = HttpUtils.paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
@@ -82,7 +82,7 @@ class BatchEntityService(
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
 
             try {
@@ -104,7 +104,7 @@ class BatchEntityService(
 
     fun delete(
         payload: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, HttpResponse<String>> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest.newBuilder().uri(
@@ -112,7 +112,7 @@ class BatchEntityService(
             )
                 .setHeader("Content-Type", APPLICATION_JSON)
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .POST(HttpRequest.BodyPublishers.ofString(payload)).build()
 
             try {

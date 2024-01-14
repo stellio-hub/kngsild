@@ -11,7 +11,7 @@ import io.egm.kngsild.model.ResourceNotFound
 import io.egm.kngsild.utils.*
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSON
 import io.egm.kngsild.utils.HttpUtils.APPLICATION_JSONLD
-import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_URI
+import io.egm.kngsild.utils.HttpUtils.DEFAULT_TENANT_NAME
 import io.egm.kngsild.utils.HttpUtils.NGSILD_TENANT_HEADER
 import io.egm.kngsild.utils.HttpUtils.httpClient
 import io.egm.kngsild.utils.HttpUtils.httpLinkHeaderBuilder
@@ -38,7 +38,7 @@ class EntityService(
 
     fun create(
         entityPayload: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, ResourceLocation> {
         return authUtils.getToken().flatMap {
             logger.debug("Creating entity $entityPayload")
@@ -47,7 +47,7 @@ class EntityService(
             )
                 .setHeader("Content-Type", APPLICATION_JSONLD)
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .POST(HttpRequest.BodyPublishers.ofString(entityPayload)).build()
             try {
                 val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
@@ -72,7 +72,7 @@ class EntityService(
     fun query(
         queryParams: Map<String, String>,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, List<NgsildEntity>> {
         val params: String = paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
@@ -84,7 +84,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .GET().build()
 
             try {
@@ -111,7 +111,7 @@ class EntityService(
         entityId: URI,
         queryParams: Map<String, String>,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, NgsildEntity> {
         val params: String = paramsUrlBuilder(queryParams)
         return authUtils.getToken().flatMap {
@@ -123,7 +123,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSONLD)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .GET().build()
 
             try {
@@ -151,7 +151,7 @@ class EntityService(
         entityId: URI,
         attributesPayload: String,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, String?> {
         return authUtils.getToken().flatMap {
             val request = HttpRequest
@@ -165,7 +165,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .build()
             return try {
                 logger.debug("Patching entity {} with payload {}", entityId, attributesPayload)
@@ -189,7 +189,7 @@ class EntityService(
         entityId: URI,
         attributes: List<NgsiLdAttributeNG>,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, String> {
         if (attributes.isEmpty()) {
             logger.info("Empty attributes list received as input, returning")
@@ -209,7 +209,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $token")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .build()
             try {
                 logger.debug("Appending attributes {} to entity {}", serializedPayload, entityId)
@@ -234,7 +234,7 @@ class EntityService(
         attributeName: String,
         ngsiLdAttribute: NgsiLdAttribute,
         contextUrl: String,
-        tenantUri: URI? = DEFAULT_TENANT_URI
+        tenantName: String? = DEFAULT_TENANT_NAME
     ): Either<ApplicationError, String> {
         return authUtils.getToken().flatMap {
             val requestPayload = serializeObject(ngsiLdAttribute.minus("type"))
@@ -246,7 +246,7 @@ class EntityService(
                 .setHeader("Accept", APPLICATION_JSON)
                 .setHeader("Link", httpLinkHeaderBuilder(contextUrl))
                 .setHeader("Authorization", "Bearer $it")
-                .setHeader(NGSILD_TENANT_HEADER, tenantUri.toString())
+                .setHeader(NGSILD_TENANT_HEADER, tenantName)
                 .build()
             return try {
                 logger.debug(

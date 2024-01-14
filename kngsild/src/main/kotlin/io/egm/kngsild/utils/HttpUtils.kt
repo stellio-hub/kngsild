@@ -1,6 +1,5 @@
 package io.egm.kngsild.utils
 
-import io.egm.kngsild.utils.UriUtils.toUri
 import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -15,7 +14,7 @@ object HttpUtils {
     const val APPLICATION_JSON = "application/json"
     const val APPLICATION_JSONLD = "application/ld+json"
     const val NGSILD_TENANT_HEADER = "NGSILD-Tenant"
-    val DEFAULT_TENANT_URI = "urn:ngsi-ld:tenant:default".toUri()
+    const val DEFAULT_TENANT_NAME = "urn:ngsi-ld:tenant:default"
 
     fun buildFormDataFromMap(data: Map<String, String>): HttpRequest.BodyPublisher {
         return HttpRequest.BodyPublishers.ofString(paramsUrlBuilder(data))
