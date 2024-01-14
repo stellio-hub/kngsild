@@ -57,7 +57,9 @@ class AuthUtils {
                     val response: Map<String, String> = JsonUtils.mapper.readValue(
                         httpResponse,
                         JsonUtils.mapper.typeFactory.constructMapLikeType(
-                            Map::class.java, String::class.java, String::class.java
+                            Map::class.java,
+                            String::class.java,
+                            String::class.java
                         )
                     )
                     val accessToken = response["access_token"]

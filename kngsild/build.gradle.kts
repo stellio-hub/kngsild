@@ -1,36 +1,40 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
+
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.5.30"
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
-    id("io.gitlab.arturbosch.detekt") version "1.16.0"
+    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("io.gitlab.arturbosch.detekt") version "1.23.4"
 
-    kotlin("kapt") version "1.5.30"
+    kotlin("kapt") version "1.9.22"
     `java-library`
     `maven-publish`
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    jcenter()
     mavenCentral()
 }
 
-val arrowVersion = "1.0.0"
-val jacksonVersion = "2.13.5"
+val arrowVersion = "1.2.1"
+val jacksonVersion = "2.16.1"
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.arrow-kt:arrow-fx-coroutines:$arrowVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("ch.qos.logback:logback-classic:1.2.9")
+    implementation("ch.qos.logback:logback-classic:1.4.14")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
-    testImplementation("com.github.tomakehurst:wiremock-standalone:2.27.2")
-    testImplementation("org.mockito:mockito-inline:3.8.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.4")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.wiremock:wiremock-standalone:3.3.1")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-version = "0.3.6"
+version = "0.4.0-dev"
 group = "io.egm"
 
 publishing {
@@ -55,7 +59,7 @@ tasks.jar {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
@@ -67,16 +71,19 @@ java {
     withSourcesJar()
 }
 
-detekt {
-    toolVersion = "1.16.0"
-    input = files("src/main/kotlin", "src/test/kotlin")
-    config = files("$rootDir/config/detekt/detekt.yml")
+tasks.withType<Detekt>().configureEach {
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
-    baseline = file("$projectDir/config/detekt/baseline.xml")
+    baseline.set(file("$projectDir/config/detekt/baseline.xml"))
 
     reports {
-        xml.enabled = true
-        txt.enabled = false
-        html.enabled = true
+        xml.required.set(true)
+        txt.required.set(false)
+        html.required.set(true)
     }
+}
+tasks.withType<DetektCreateBaselineTask>().configureEach {
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    buildUponDefaultConfig.set(true)
+    baseline.set(file("$projectDir/config/detekt/baseline.xml"))
 }

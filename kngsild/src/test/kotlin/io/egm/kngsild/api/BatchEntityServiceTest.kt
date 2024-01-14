@@ -3,27 +3,15 @@ package io.egm.kngsild.api
 import arrow.core.left
 import arrow.core.right
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.badRequest
-import com.github.tomakehurst.wiremock.client.WireMock.configureFor
-import com.github.tomakehurst.wiremock.client.WireMock.created
-import com.github.tomakehurst.wiremock.client.WireMock.noContent
-import com.github.tomakehurst.wiremock.client.WireMock.post
-import com.github.tomakehurst.wiremock.client.WireMock.reset
-import com.github.tomakehurst.wiremock.client.WireMock.stubFor
-import com.github.tomakehurst.wiremock.client.WireMock.urlMatching
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import io.egm.kngsild.model.AccessTokenNotRetrieved
 import io.egm.kngsild.utils.AuthUtils
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import java.io.File
 import java.net.HttpURLConnection
 
@@ -75,8 +63,7 @@ class BatchEntityServiceTest {
 
         val response = batchEntityService.create(batchEntityPayload)
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
+        assertTrue(response.isRight { it.statusCode() == HttpURLConnection.HTTP_CREATED })
     }
 
     @Test
@@ -135,8 +122,7 @@ class BatchEntityServiceTest {
 
         val response = batchEntityService.upsert(batchEntityPayload, emptyMap())
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_CREATED })
+        assertTrue(response.isRight { it.statusCode() == HttpURLConnection.HTTP_CREATED })
     }
 
     @Test
@@ -195,8 +181,7 @@ class BatchEntityServiceTest {
 
         val response = batchEntityService.delete(batchEntityPayload)
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it.statusCode() == HttpURLConnection.HTTP_NO_CONTENT })
+        assertTrue(response.isRight { it.statusCode() == HttpURLConnection.HTTP_NO_CONTENT })
     }
 
     @Test
@@ -219,6 +204,4 @@ class BatchEntityServiceTest {
 
         assertTrue(response.isLeft())
     }
-
-    private fun <T> any(type: Class<T>): T = Mockito.any(type)
 }

@@ -68,7 +68,7 @@ class TemporalServiceTest {
         val response = temporalService.addAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             ngsiLdAttributes.groupByProperty(),
-            NgsiLdUtils.coreContext
+            NgsiLdUtils.NGSILD_CORE_CONTEXT
         )
 
         Assertions.assertTrue(response.isRight())
@@ -114,11 +114,10 @@ class TemporalServiceTest {
         val response = temporalService.retrieve(
             "urn:ngsi-ld:Sensor:01".toUri()!!,
             emptyMap(),
-            NgsiLdUtils.coreContext
+            NgsiLdUtils.NGSILD_CORE_CONTEXT
         )
 
-        Assertions.assertTrue(response.isRight())
-        Assertions.assertTrue(response.exists { it["id"] == "urn:ngsi-ld:Sensor:01" })
+        Assertions.assertTrue(response.isRight { it["id"] == "urn:ngsi-ld:Sensor:01" })
     }
 
     private fun gimmeNgsildEntity(id: URI, attributes: Map<String, Any>): NgsildEntity =

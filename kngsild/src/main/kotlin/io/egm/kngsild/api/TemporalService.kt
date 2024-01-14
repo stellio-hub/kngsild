@@ -48,7 +48,7 @@ class TemporalService(
                     "Appending ${ngsiLdTemporalAttributesInstances.size} attributes: " +
                         "$contextBrokerUrl$temporalApiRootPath/$entityId/attrs"
                 )
-                logger.trace("Appending attributes $serializedPayload to entity $entityId")
+                logger.trace("Appending attributes {} to entity {}", serializedPayload, entityId)
                 val response = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response body: ${response.body()} (${response.statusCode()})")
                 if (HttpURLConnection.HTTP_NO_CONTENT == response.statusCode())
@@ -85,7 +85,7 @@ class TemporalService(
                 .GET().build()
 
             try {
-                logger.debug("Issuing retrieve: $contextBrokerUrl$temporalApiRootPath/$entityId$params")
+                logger.debug("Issuing retrieve: {}{}/{}{}", contextBrokerUrl, temporalApiRootPath, entityId, params)
                 val httpResponse = HttpUtils.httpClient.send(request, HttpResponse.BodyHandlers.ofString())
                 logger.debug("Http response status code: ${httpResponse.statusCode()}")
                 logger.trace("Http response body: ${httpResponse.body()}")

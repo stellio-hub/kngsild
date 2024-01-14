@@ -103,13 +103,13 @@ class NgsiLdEntityBuilder(
                 if (contexts.isNotEmpty())
                     it.plus("@context" to contexts)
                 else
-                    it.plus("@context" to NgsiLdUtils.coreContext)
+                    it.plus("@context" to NgsiLdUtils.NGSILD_CORE_CONTEXT)
             }
 }
 
 object NgsiLdUtils {
 
-    const val coreContext = "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
+    const val NGSILD_CORE_CONTEXT = "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context-v1.7.jsonld"
 
     fun propertyAttribute(value: Any) = mapOf(
         "type" to "Property",

@@ -93,7 +93,7 @@ class NgsiLdUtilsTest {
 
         assertEquals("urn:ngsi-ld:Entity:123", entity["id"].toString())
         assertEquals("Entity", entity["type"])
-        assertEquals(NgsiLdUtils.coreContext, entity["@context"])
+        assertEquals(NgsiLdUtils.NGSILD_CORE_CONTEXT, entity["@context"])
     }
 
     @Test

@@ -12,14 +12,14 @@ import io.egm.kngsild.utils.AuthUtils
 import io.egm.kngsild.utils.JsonUtils.serializeObject
 import io.egm.kngsild.utils.NgsiLdAttributeNG
 import io.egm.kngsild.utils.NgsiLdPropertyBuilder
-import io.egm.kngsild.utils.NgsiLdUtils.coreContext
+import io.egm.kngsild.utils.NgsiLdUtils.NGSILD_CORE_CONTEXT
 import io.egm.kngsild.utils.NgsildEntity
 import io.egm.kngsild.utils.UriUtils.toUri
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import java.io.File
 import java.net.URI
 import java.time.ZonedDateTime
@@ -71,8 +71,7 @@ class EntityServiceTest {
 
         val response = entityService.create(entityPayload)
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it == "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01" })
+        assertTrue(response.isRight { it == "/ngsi-ld/v1/entities/urn:ngsi-ld:Building:01" })
     }
 
     @Test
@@ -111,10 +110,9 @@ class EntityServiceTest {
         ).thenReturn("token".right())
         val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.query(emptyMap(), coreContext)
+        val response = entityService.query(emptyMap(), NGSILD_CORE_CONTEXT)
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it.size == 2 })
+        assertTrue(response.isRight { it.size == 2 })
     }
 
     @Test
@@ -130,7 +128,7 @@ class EntityServiceTest {
         ).thenReturn("token".right())
         val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.query(emptyMap(), coreContext)
+        val response = entityService.query(emptyMap(), NGSILD_CORE_CONTEXT)
 
         assertTrue(response.isRight())
         assertEquals(response, emptyList<NgsildEntity>().right())
@@ -138,14 +136,13 @@ class EntityServiceTest {
 
     @Test
     fun `it should return a left AccessTokenNotRetrieved from authUtils if no access token was retrieved`() {
-
         val mockedAuthUtils = mock(AuthUtils::class.java)
         `when`(
             mockedAuthUtils.getToken()
         ).thenReturn(AccessTokenNotRetrieved("Unable to get an access token").left())
         val entityService = EntityService("http://localhost:8089", mockedAuthUtils)
 
-        val response = entityService.query(emptyMap(), coreContext)
+        val response = entityService.query(emptyMap(), NGSILD_CORE_CONTEXT)
 
         assertTrue(response.isLeft())
         assertEquals(response, AccessTokenNotRetrieved("Unable to get an access token").left())
@@ -168,11 +165,10 @@ class EntityServiceTest {
         val response = entityService.retrieve(
             "urn:ngsi-ld:Sensor:01".toUri()!!,
             emptyMap(),
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
-        assertTrue(response.isRight())
-        assertTrue(response.exists { it["id"] == "urn:ngsi-ld:Sensor:01" })
+        assertTrue(response.isRight { it["id"] == "urn:ngsi-ld:Sensor:01" })
     }
 
     @Test
@@ -191,7 +187,7 @@ class EntityServiceTest {
         val response = entityService.retrieve(
             "urn:ngsi-ld:Sensor:01".toUri()!!,
             emptyMap(),
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isLeft())
@@ -217,7 +213,7 @@ class EntityServiceTest {
         val response = entityService.updateAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             entityAttributesUpdatePayload,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isRight())
@@ -242,7 +238,7 @@ class EntityServiceTest {
         val response = entityService.updateAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             entityAttributesUpdatePayload,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isLeft())
@@ -274,7 +270,7 @@ class EntityServiceTest {
         val response = entityService.appendAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             ngsiLdAttribute,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isRight())
@@ -330,7 +326,7 @@ class EntityServiceTest {
         val response = entityService.appendAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             ngsiLdAttribute,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isRight())
@@ -389,7 +385,7 @@ class EntityServiceTest {
         val response = entityService.appendAttributes(
             "urn:ngsi-ld:Building:01".toUri()!!,
             ngsiLdAttribute,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isRight())
@@ -438,7 +434,7 @@ class EntityServiceTest {
             "urn:ngsi-ld:Building:01".toUri()!!,
             "temperature",
             partialPropery.propertyValue,
-            coreContext
+            NGSILD_CORE_CONTEXT
         )
 
         assertTrue(response.isRight())
