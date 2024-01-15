@@ -34,7 +34,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-version = "0.4.0-dev"
+version = "0.4.0"
 group = "io.egm"
 
 publishing {
