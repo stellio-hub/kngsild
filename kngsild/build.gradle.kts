@@ -3,10 +3,10 @@ import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
+    id("org.jetbrains.kotlin.jvm") version "1.8.20"
     id("io.gitlab.arturbosch.detekt") version "1.23.4"
 
-    kotlin("kapt") version "1.9.22"
+    kotlin("kapt") version "1.8.20"
     `java-library`
     `maven-publish`
 }
